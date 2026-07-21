@@ -26,7 +26,8 @@
     "check-types": "tsc --noEmit",
     "build": "tsdown ./src",
     "lint": "biome check --write .",
-    "lint:ci": "biome check ."
+    "lint:ci": "biome check .",
+    "test": "vitest run"
   },
   "devEngines": {
     "runtime": {
@@ -46,9 +47,11 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",
     "@changesets/cli": "^2.31.1",
+    "@rolldown/binding-darwin-arm64": "^1.2.0",
     "@types/node": "^26.1.1",
     "tsdown": "^0.22.12",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "keywords": [
     "evolution",
