@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { LabelModule } from "./label.js";
+import { LabelModule } from "./label";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});

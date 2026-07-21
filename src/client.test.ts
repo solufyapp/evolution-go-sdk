@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { EvolutionGoClient } from "./client.js";
-import { EvolutionGoApiError } from "./errors.js";
+import { EvolutionGoClient } from "./client";
+import { EvolutionGoApiError } from "./errors";
 
 function makeFetch(status: number, body: unknown) {
   return vi.fn().mockResolvedValue({

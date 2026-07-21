@@ -6,5 +6,5 @@ export type {
   SetGroupPhotoBody,
   UpdateGroupSettingsBody,
   UpdateParticipantsBody,
-} from "./types.js";
-export { GroupModule } from "./group.js";
+} from "./types";
+export { GroupModule } from "./group";

@@ -1,11 +1,11 @@
-import type { AdvancedSettings, ProxyConfig } from "../../shared.js";
-import type { RequestFn } from "../../transport.js";
+import type { AdvancedSettings, ProxyConfig } from "@/shared";
+import type { RequestFn } from "@/transport";
 import type {
   ConnectBody,
   CreateInstanceBody,
   GetLogsQuery,
   PairBody,
-} from "./types.js";
+} from "./types";
 
 export class InstanceModule {
   readonly #request: RequestFn;

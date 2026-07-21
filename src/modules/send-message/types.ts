@@ -1,4 +1,4 @@
-import type { QuotedStruct, VCardStruct } from "../../shared.js";
+import type { QuotedStruct, VCardStruct } from "@/shared";
 
 export interface SendMessageBase {
   number: string;

@@ -1,2 +1,2 @@
-export type { RejectCallBody } from "./types.js";
-export { CallModule } from "./call.js";
+export type { RejectCallBody } from "./types";
+export { CallModule } from "./call";

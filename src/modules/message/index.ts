@@ -5,5 +5,5 @@ export type {
   MessageBatchBody,
   ReactBody,
   SetPresenceBody,
-} from "./types.js";
-export { MessageModule } from "./message.js";
+} from "./types";
+export { MessageModule } from "./message";

@@ -47,7 +47,6 @@
               ":BLANK_LINE:",
               { "type": true, "source": "@/**" },
               "@/**",
-              ":BLANK_LINE:",
               { "type": true, "source": ":PATH:" },
               ":PATH:"
             ]

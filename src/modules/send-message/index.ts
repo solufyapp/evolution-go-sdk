@@ -22,5 +22,5 @@ export type {
   SendStatusTextBody,
   SendStickerBody,
   SendTextBody,
-} from "./types.js";
-export { SendMessageModule } from "./send-message.js";
+} from "./types";
+export { SendMessageModule } from "./send-message";

@@ -1,4 +1,4 @@
-import type { AdvancedSettings, ProxyConfig } from "../../shared.js";
+import type { AdvancedSettings, ProxyConfig } from "@/shared";
 
 export interface ConnectBody {
   phone?: string;

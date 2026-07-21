@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { GroupModule } from "./group.js";
+import { GroupModule } from "./group";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});

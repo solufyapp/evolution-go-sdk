@@ -1,4 +1,4 @@
-import type { RequestFn, RequestFormFn } from "../../transport.js";
+import type { RequestFn, RequestFormFn } from "@/transport";
 import type {
   SendButtonBody,
   SendCarouselBody,
@@ -12,7 +12,7 @@ import type {
   SendStatusTextBody,
   SendStickerBody,
   SendTextBody,
-} from "./types.js";
+} from "./types";
 
 export class SendMessageModule {
   readonly #request: RequestFn;

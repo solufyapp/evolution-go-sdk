@@ -1,9 +1,5 @@
-import type { RequestFn } from "../../transport.js";
-import type {
-  ChatLabelBody,
-  EditLabelBody,
-  MessageLabelBody,
-} from "./types.js";
+import type { RequestFn } from "@/transport";
+import type { ChatLabelBody, EditLabelBody, MessageLabelBody } from "./types";
 
 export class LabelModule {
   readonly #request: RequestFn;

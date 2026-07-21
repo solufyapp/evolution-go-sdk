@@ -3,5 +3,5 @@ export type {
   CreateInstanceBody,
   GetLogsQuery,
   PairBody,
-} from "./types.js";
-export { InstanceModule } from "./instance.js";
+} from "./types";
+export { InstanceModule } from "./instance";

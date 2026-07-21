@@ -1,4 +1,4 @@
-import type { RequestFn } from "../../transport.js";
+import type { RequestFn } from "@/transport";
 import type {
   DeleteMessageBody,
   DownloadMediaBody,
@@ -6,7 +6,7 @@ import type {
   MessageBatchBody,
   ReactBody,
   SetPresenceBody,
-} from "./types.js";
+} from "./types";
 
 export class MessageModule {
   readonly #request: RequestFn;

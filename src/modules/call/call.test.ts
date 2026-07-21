@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { CallModule } from "./call.js";
+import { CallModule } from "./call";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});

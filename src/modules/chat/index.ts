@@ -1,2 +1,2 @@
-export type { HistorySyncRequestBody } from "./types.js";
-export { ChatModule } from "./chat.js";
+export type { HistorySyncRequestBody } from "./types";
+export { ChatModule } from "./chat";

@@ -1,5 +1,5 @@
-import type { RequestFn } from "../../transport.js";
-import type { RejectCallBody } from "./types.js";
+import type { RequestFn } from "@/transport";
+import type { RejectCallBody } from "./types";
 
 export class CallModule {
   readonly #request: RequestFn;

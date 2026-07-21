@@ -1,2 +1,2 @@
-export type { CommunityParticipantBody } from "./types.js";
-export { CommunityModule } from "./community.js";
+export type { CommunityParticipantBody } from "./types";
+export { CommunityModule } from "./community";

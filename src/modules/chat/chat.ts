@@ -1,5 +1,5 @@
-import type { RequestFn } from "../../transport.js";
-import type { HistorySyncRequestBody } from "./types.js";
+import type { RequestFn } from "@/transport";
+import type { HistorySyncRequestBody } from "./types";
 
 export class ChatModule {
   readonly #request: RequestFn;

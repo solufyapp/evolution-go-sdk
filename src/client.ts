@@ -1,13 +1,13 @@
-import type { RequestOptions } from "./transport.js";
-import { EvolutionGoApiError } from "./errors.js";
-import { CallModule } from "./modules/call/index.js";
-import { ChatModule } from "./modules/chat/index.js";
-import { CommunityModule } from "./modules/community/index.js";
-import { GroupModule } from "./modules/group/index.js";
-import { InstanceModule } from "./modules/instance/index.js";
-import { LabelModule } from "./modules/label/index.js";
-import { MessageModule } from "./modules/message/index.js";
-import { SendMessageModule } from "./modules/send-message/index.js";
+import type { RequestOptions } from "./transport";
+import { EvolutionGoApiError } from "./errors";
+import { CallModule } from "./modules/call";
+import { ChatModule } from "./modules/chat";
+import { CommunityModule } from "./modules/community";
+import { GroupModule } from "./modules/group";
+import { InstanceModule } from "./modules/instance";
+import { LabelModule } from "./modules/label";
+import { MessageModule } from "./modules/message";
+import { SendMessageModule } from "./modules/send-message";
 
 export interface EvolutionGoClientConfig {
   baseUrl: string;

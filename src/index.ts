@@ -1,7 +1,7 @@
-export type { EvolutionGoClientConfig } from "./client.js";
-export type { RejectCallBody } from "./modules/call/index.js";
-export type { HistorySyncRequestBody } from "./modules/chat/index.js";
-export type { CommunityParticipantBody } from "./modules/community/index.js";
+export type { EvolutionGoClientConfig } from "./client";
+export type { RejectCallBody } from "./modules/call";
+export type { HistorySyncRequestBody } from "./modules/chat";
+export type { CommunityParticipantBody } from "./modules/community";
 export type {
   CreateGroupBody,
   GetGroupInviteLinkBody,
@@ -10,18 +10,18 @@ export type {
   SetGroupPhotoBody,
   UpdateGroupSettingsBody,
   UpdateParticipantsBody,
-} from "./modules/group/index.js";
+} from "./modules/group";
 export type {
   ConnectBody,
   CreateInstanceBody,
   GetLogsQuery,
   PairBody,
-} from "./modules/instance/index.js";
+} from "./modules/instance";
 export type {
   ChatLabelBody,
   EditLabelBody,
   MessageLabelBody,
-} from "./modules/label/index.js";
+} from "./modules/label";
 export type {
   DeleteMessageBody,
   DownloadMediaBody,
@@ -29,7 +29,7 @@ export type {
   MessageBatchBody,
   ReactBody,
   SetPresenceBody,
-} from "./modules/message/index.js";
+} from "./modules/message";
 export type {
   Button,
   ButtonType,
@@ -54,7 +54,7 @@ export type {
   SendStatusTextBody,
   SendStickerBody,
   SendTextBody,
-} from "./modules/send-message/index.js";
+} from "./modules/send-message";
 export type {
   AdvancedSettings,
   GroupSettingsAction,
@@ -62,7 +62,7 @@ export type {
   ProxyConfig,
   QuotedStruct,
   VCardStruct,
-} from "./shared.js";
-export type { RequestFn, RequestFormFn, RequestOptions } from "./transport.js";
-export { EvolutionGoClient } from "./client.js";
-export { EvolutionGoApiError } from "./errors.js";
+} from "./shared";
+export type { RequestFn, RequestFormFn, RequestOptions } from "./transport";
+export { EvolutionGoClient } from "./client";
+export { EvolutionGoApiError } from "./errors";

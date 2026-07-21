@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { CommunityModule } from "./community.js";
+import { CommunityModule } from "./community";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});

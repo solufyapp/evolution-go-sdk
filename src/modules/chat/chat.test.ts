@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ChatModule } from "./chat.js";
+import { ChatModule } from "./chat";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});

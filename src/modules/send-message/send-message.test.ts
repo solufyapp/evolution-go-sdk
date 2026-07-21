@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { SendMessageModule } from "./send-message.js";
+import { SendMessageModule } from "./send-message";
 
 function makeSpies() {
   const request = vi.fn().mockResolvedValue({});

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { MessageModule } from "./message.js";
+import { MessageModule } from "./message";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});

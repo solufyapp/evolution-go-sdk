@@ -1,5 +1,5 @@
-import type { RequestFn } from "../../transport.js";
-import type { CommunityParticipantBody } from "./types.js";
+import type { RequestFn } from "@/transport";
+import type { CommunityParticipantBody } from "./types";
 
 export class CommunityModule {
   readonly #request: RequestFn;

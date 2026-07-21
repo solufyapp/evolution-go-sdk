@@ -1,4 +1,4 @@
-import type { GroupSettingsAction, ParticipantChange } from "../../shared.js";
+import type { GroupSettingsAction, ParticipantChange } from "@/shared";
 
 export interface CreateGroupBody {
   groupName: string;

@@ -1,4 +1,4 @@
-import type { RequestFn } from "../../transport.js";
+import type { RequestFn } from "@/transport";
 import type {
   CreateGroupBody,
   GetGroupInviteLinkBody,
@@ -7,7 +7,7 @@ import type {
   SetGroupPhotoBody,
   UpdateGroupSettingsBody,
   UpdateParticipantsBody,
-} from "./types.js";
+} from "./types";
 
 export class GroupModule {
   readonly #request: RequestFn;
