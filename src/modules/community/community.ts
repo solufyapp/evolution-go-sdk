@@ -1,13 +1,5 @@
-type RequestFn = <T>(
-  method: string,
-  path: string,
-  opts?: { body?: unknown },
-) => Promise<T>;
-
-export interface CommunityParticipantBody {
-  communityJid?: string;
-  groupJid?: string[];
-}
+import type { RequestFn } from "../../transport.js";
+import type { CommunityParticipantBody } from "./types.js";
 
 export class CommunityModule {
   readonly #request: RequestFn;

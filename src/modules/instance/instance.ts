@@ -1,43 +1,11 @@
-import type { AdvancedSettings, ProxyConfig } from "../shared.js";
-
-type RequestFn = <T>(
-  method: string,
-  path: string,
-  opts?: {
-    body?: unknown;
-    query?: Record<string, string | number | boolean | undefined>;
-  },
-) => Promise<T>;
-
-export interface ConnectBody {
-  phone?: string;
-  immediate?: boolean;
-  webhookUrl?: string;
-  websocketEnable?: string;
-  natsEnable?: string;
-  rabbitmqEnable?: string;
-  subscribe?: string[];
-}
-
-export interface CreateInstanceBody {
-  name?: string;
-  instanceId?: string;
-  token?: string;
-  proxy?: ProxyConfig;
-  advancedSettings?: AdvancedSettings;
-}
-
-export interface PairBody {
-  phone?: string;
-  subscribe?: string[];
-}
-
-export interface GetLogsQuery {
-  start_date?: string;
-  end_date?: string;
-  level?: string;
-  limit?: number;
-}
+import type { AdvancedSettings, ProxyConfig } from "../../shared.js";
+import type { RequestFn } from "../../transport.js";
+import type {
+  ConnectBody,
+  CreateInstanceBody,
+  GetLogsQuery,
+  PairBody,
+} from "./types.js";
 
 export class InstanceModule {
   readonly #request: RequestFn;

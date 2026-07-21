@@ -1,48 +1,12 @@
-type RequestFn = <T>(
-  method: string,
-  path: string,
-  opts?: { body?: unknown },
-) => Promise<T>;
-
-export interface DeleteMessageBody {
-  chat: string;
-  messageId: string;
-}
-
-export interface DownloadMediaBody {
-  message: Record<string, unknown>;
-}
-
-export interface EditMessageBody {
-  chat: string;
-  messageId: string;
-  message: string;
-}
-
-export interface MarkPlayedBody {
-  number: string;
-  id: string[];
-}
-
-export interface MarkReadBody {
-  number: string;
-  id: string[];
-}
-
-export interface SetPresenceBody {
-  number: string;
-  state: string;
-  isAudio?: boolean;
-  delay?: number;
-}
-
-export interface ReactBody {
-  number: string;
-  id: string;
-  reaction: string;
-  fromMe?: boolean;
-  participant?: string;
-}
+import type { RequestFn } from "../../transport.js";
+import type {
+  DeleteMessageBody,
+  DownloadMediaBody,
+  EditMessageBody,
+  MessageBatchBody,
+  ReactBody,
+  SetPresenceBody,
+} from "./types.js";
 
 export class MessageModule {
   readonly #request: RequestFn;
@@ -63,11 +27,11 @@ export class MessageModule {
     return this.#request("POST", "/message/edit", { body });
   }
 
-  markPlayed(body: MarkPlayedBody) {
+  markPlayed(body: MessageBatchBody) {
     return this.#request("POST", "/message/markplayed", { body });
   }
 
-  markRead(body: MarkReadBody) {
+  markRead(body: MessageBatchBody) {
     return this.#request("POST", "/message/markread", { body });
   }
 

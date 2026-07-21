@@ -1,46 +1,13 @@
-import type { GroupSettingsAction, ParticipantChange } from "../shared.js";
-
-type RequestFn = <T>(
-  method: string,
-  path: string,
-  opts?: { body?: unknown },
-) => Promise<T>;
-
-export interface CreateGroupBody {
-  groupName: string;
-  participants?: string[];
-}
-
-export interface SetGroupDescriptionBody {
-  groupJid: string;
-  description: string;
-}
-
-export interface GetGroupInviteLinkBody {
-  groupJid: string;
-  reset?: boolean;
-}
-
-export interface SetGroupNameBody {
-  groupJid: string;
-  name: string;
-}
-
-export interface UpdateParticipantsBody {
-  groupJid: string;
-  participants: string[];
-  action: ParticipantChange;
-}
-
-export interface SetGroupPhotoBody {
-  groupJid: string;
-  image: string;
-}
-
-export interface UpdateGroupSettingsBody {
-  groupJid: string;
-  action: GroupSettingsAction;
-}
+import type { RequestFn } from "../../transport.js";
+import type {
+  CreateGroupBody,
+  GetGroupInviteLinkBody,
+  SetGroupDescriptionBody,
+  SetGroupNameBody,
+  SetGroupPhotoBody,
+  UpdateGroupSettingsBody,
+  UpdateParticipantsBody,
+} from "./types.js";
 
 export class GroupModule {
   readonly #request: RequestFn;

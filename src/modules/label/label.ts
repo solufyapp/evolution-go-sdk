@@ -1,26 +1,9 @@
-type RequestFn = <T>(
-  method: string,
-  path: string,
-  opts?: { body?: unknown },
-) => Promise<T>;
-
-export interface ChatLabelBody {
-  jid: string;
-  labelId: string;
-}
-
-export interface MessageLabelBody {
-  jid: string;
-  labelId: string;
-  messageId: string;
-}
-
-export interface EditLabelBody {
-  labelId: string;
-  name?: string;
-  color?: number;
-  deleted?: boolean;
-}
+import type { RequestFn } from "../../transport.js";
+import type {
+  ChatLabelBody,
+  EditLabelBody,
+  MessageLabelBody,
+} from "./types.js";
 
 export class LabelModule {
   readonly #request: RequestFn;

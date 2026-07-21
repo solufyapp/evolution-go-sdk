@@ -1,22 +1,18 @@
+import type { RequestOptions } from "./transport.js";
 import { EvolutionGoApiError } from "./errors.js";
-import { CallModule } from "./modules/call.js";
-import { ChatModule } from "./modules/chat.js";
-import { CommunityModule } from "./modules/community.js";
-import { GroupModule } from "./modules/group.js";
-import { InstanceModule } from "./modules/instance.js";
-import { LabelModule } from "./modules/label.js";
-import { MessageModule } from "./modules/message.js";
-import { SendMessageModule } from "./modules/send-message.js";
+import { CallModule } from "./modules/call/index.js";
+import { ChatModule } from "./modules/chat/index.js";
+import { CommunityModule } from "./modules/community/index.js";
+import { GroupModule } from "./modules/group/index.js";
+import { InstanceModule } from "./modules/instance/index.js";
+import { LabelModule } from "./modules/label/index.js";
+import { MessageModule } from "./modules/message/index.js";
+import { SendMessageModule } from "./modules/send-message/index.js";
 
 export interface EvolutionGoClientConfig {
   baseUrl: string;
   apiKey: string;
   fetch?: typeof globalThis.fetch;
-}
-
-interface RequestOptions {
-  body?: unknown;
-  query?: Record<string, string | number | boolean | undefined>;
 }
 
 export class EvolutionGoClient {

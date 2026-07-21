@@ -1,13 +1,5 @@
-type RequestFn = <T>(
-  method: string,
-  path: string,
-  opts?: { body?: unknown },
-) => Promise<T>;
-
-export interface HistorySyncRequestBody {
-  count?: number;
-  messageInfo?: Record<string, unknown>;
-}
+import type { RequestFn } from "../../transport.js";
+import type { HistorySyncRequestBody } from "./types.js";
 
 export class ChatModule {
   readonly #request: RequestFn;

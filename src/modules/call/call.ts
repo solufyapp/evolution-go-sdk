@@ -1,14 +1,5 @@
-type RequestFn = <T>(
-  method: string,
-  path: string,
-  opts?: { body?: unknown },
-) => Promise<T>;
-
-export interface RejectCallBody {
-  /** String JID of the call creator */
-  callCreator?: string;
-  callId?: string;
-}
+import type { RequestFn } from "../../transport.js";
+import type { RejectCallBody } from "./types.js";
 
 export class CallModule {
   readonly #request: RequestFn;
