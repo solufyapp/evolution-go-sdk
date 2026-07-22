@@ -17,19 +17,21 @@ export class Community {
     return jidToString(this.data.JID);
   }
 
-  addParticipants(groupJid: string[]) {
-    return this.#request<CommunityParticipantResponse>(
+  async addParticipants(groupJid: string[]) {
+    const res = await this.#request<CommunityParticipantResponse>(
       "POST",
       "/community/add",
       { body: { communityJid: this.jid, groupJid } },
     );
+    return res.data;
   }
 
-  removeParticipants(groupJid: string[]) {
-    return this.#request<CommunityParticipantResponse>(
+  async removeParticipants(groupJid: string[]) {
+    const res = await this.#request<CommunityParticipantResponse>(
       "POST",
       "/community/remove",
       { body: { communityJid: this.jid, groupJid } },
     );
+    return res.data;
   }
 }

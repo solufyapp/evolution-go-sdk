@@ -105,6 +105,7 @@ export type GetStatusResponse = SuccessResponse<{
 
 export type InstanceActionResponse = SuccessMessage;
 
+/** Wire shape has no `data` field — `{ message, settings }` instead. */
 export interface UpdateAdvancedSettingsResponse {
   message: string;
   settings: AdvancedSettings;

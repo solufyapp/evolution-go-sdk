@@ -10,8 +10,8 @@ export class CallModule {
     this.#request = request;
   }
 
-  reject(body: RejectCallBody) {
-    return this.#request<SuccessMessage>("POST", "/call/reject", {
+  async reject(body: RejectCallBody) {
+    await this.#request<SuccessMessage>("POST", "/call/reject", {
       body: {
         callCreator: body.callCreator ? parseJid(body.callCreator) : undefined,
         callId: body.callId,

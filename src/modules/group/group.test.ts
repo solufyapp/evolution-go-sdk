@@ -70,8 +70,8 @@ describe("GroupModule", () => {
     expect(r).toHaveBeenNthCalledWith(2, "POST", "/group/info", {
       body: { groupJid: "123456789-987654321@g.us" },
     });
-    expect(result.data).toBeInstanceOf(Group);
-    expect(result.data.jid).toBe("123456789-987654321@g.us");
+    expect(result).toBeInstanceOf(Group);
+    expect(result.jid).toBe("123456789-987654321@g.us");
   });
 
   it("setDescription", async () => {
@@ -93,7 +93,7 @@ describe("GroupModule", () => {
     expect(r).toHaveBeenCalledWith("POST", "/group/info", {
       body: { groupJid: "g@g.us" },
     });
-    expect(result.data).toBeInstanceOf(Group);
+    expect(result).toBeInstanceOf(Group);
   });
 
   it("getInviteLink", async () => {
@@ -134,7 +134,7 @@ describe("GroupModule", () => {
       .mockResolvedValue({ message: "success", data: [groupInfo] });
     const result = await new GroupModule(r).list();
     expect(r).toHaveBeenCalledWith("GET", "/group/list");
-    expect(result.data[0]).toBeInstanceOf(Group);
+    expect(result[0]).toBeInstanceOf(Group);
   });
 
   it("myGroups wraps each item in a Group entity", async () => {
@@ -143,7 +143,7 @@ describe("GroupModule", () => {
       .mockResolvedValue({ message: "success", data: [groupInfo] });
     const result = await new GroupModule(r).myGroups();
     expect(r).toHaveBeenCalledWith("GET", "/group/myall");
-    expect(result.data[0]).toBeInstanceOf(Group);
+    expect(result[0]).toBeInstanceOf(Group);
   });
 
   it("setName", async () => {

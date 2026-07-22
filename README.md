@@ -24,7 +24,7 @@ const client = new EvolutionGoClient({
 });
 
 try {
-  const { data: instances } = await client.instance.getAll();
+  const instances = await client.instance.getAll();
   console.log(instances.map((i) => `${i.data.name} (connected: ${i.data.connected})`));
 } catch (err) {
   if (err instanceof EvolutionGoApiError) {
@@ -34,6 +34,10 @@ try {
   }
 }
 ```
+
+Every method resolves directly to the data you asked for — no `{message,
+data}` envelope to unwrap. The server always sends one back, but the SDK
+strips it before returning.
 
 The `apikey` header is sent on every request — either a global key or an
 instance-specific token (returned by `client.instance.create`), per
@@ -50,12 +54,14 @@ instance" is just a new client using that instance's token, which
 
 ```ts
 const admin = new EvolutionGoClient({ baseUrl, apiKey: globalKey });
-const { data: instance } = await admin.instance.getInfo("inst-123");
+const instance = await admin.instance.getInfo("inst-123");
 
 const instanceClient = admin.forInstance(instance); // or admin.forInstance(instance.data.token)
 await instanceClient.chat.archive("5511999999999@s.whatsapp.net");
 await instanceClient.sendMessage.text({ number: "5511999999999", text: "Hi!" });
 ```
+
+An `Instance` entity can also do this itself — see Entities below.
 
 ## Modules
 
@@ -79,7 +85,7 @@ rich object, not just data — it carries both the underlying data (in
 `.data`) and bound methods for the actions that scope to that identity:
 
 ```ts
-const { data: instance } = await client.instance.create({
+const instance = await client.instance.create({
   name: "my-instance",
   token: "some-secret-token",
 });
@@ -87,7 +93,17 @@ await instance.setProxy({ host: "proxy.example.com", port: "8080" });
 await instance.getAdvancedSettings();
 await instance.delete();
 
-const { data: group } = await client.group.getInfo("123456789-987654321@g.us");
+// connect/disconnect/reconnect/logout/getStatus/getQr/pair have no
+// instanceId param on the server — they're authenticated by whichever
+// apikey the request carries. The entity sends its own token
+// (instance.data.token), so these correctly act on this instance
+// regardless of which key the client itself was built with:
+await instance.connect({ phone: "5511999999999" });
+const qr = await instance.getQr();
+const status = await instance.getStatus();
+await instance.disconnect();
+
+const group = await client.group.getInfo("123456789-987654321@g.us");
 await group.setName("New name");
 await group.updateSettings("locked");
 await group.leave();
@@ -96,11 +112,13 @@ await group.refresh(); // re-fetch to pick up changes made elsewhere
 
 Mutating an entity method (e.g. `group.setName(...)`) performs the action
 and returns its own response — it does **not** silently update the
-entity's cached `.data`. Call `.refresh()` when you want that.
+entity's cached `.data`. Call `.refresh()` when you want that (available
+on `Instance` and `Group`; `Label` and `Community` have no single-item
+GET endpoint to refresh from).
 
 Chat and Message have no "get by id" endpoint on the server, so they get
-a thin variant: a thin handle with bound methods and no cached data,
-built locally via `.from(...)` (no network call):
+a thin variant: a handle with bound methods and no cached data, built
+locally via `.from(...)` (no network call):
 
 ```ts
 const chat = client.chat.from("5511999999999@s.whatsapp.net");
@@ -149,7 +167,7 @@ Entities above).
 ### Community
 
 ```ts
-const { data: community } = await client.community.create("My Community");
+const community = await client.community.create("My Community");
 await community.addParticipants(["123456789-987654321@g.us"]);
 await community.removeParticipants(["123456789-987654321@g.us"]);
 ```
@@ -157,7 +175,7 @@ await community.removeParticipants(["123456789-987654321@g.us"]);
 ### Group
 
 ```ts
-const { data: group } = await client.group.create({
+const group = await client.group.create({
   groupName: "Dev Team",
   participants: ["5511999999999@s.whatsapp.net"],
 });
@@ -167,11 +185,11 @@ await group.setDescription("...");
 await group.setPhoto("<base64>");
 await group.updateParticipants(["5511999999999@s.whatsapp.net"], "promote"); // add | remove | promote | demote
 await group.updateSettings("locked");
-const { data: link } = await group.getInviteLink();
+const link = await group.getInviteLink();
 await group.leave();
 
-const { data: groups } = await client.group.list();
-const { data: myGroups } = await client.group.myGroups();
+const groups = await client.group.list();
+const myGroups = await client.group.myGroups();
 
 await client.group.join("<invite-code>");
 ```
@@ -179,7 +197,7 @@ await client.group.join("<invite-code>");
 ### Instance
 
 ```ts
-const { data: instance } = await client.instance.create({
+const instance = await client.instance.create({
   name: "my-instance",
   token: "some-secret-token",
 });
@@ -192,19 +210,17 @@ const logs = await instance.getLogs({ level: "error", limit: 50 });
 await instance.forceReconnect();
 await instance.delete();
 
-// connect/disconnect/reconnect/logout/getStatus/getQr/pair have no id
-// param on the server — they act on whichever instance your apiKey
-// authenticates as, so they stay flat methods on the module, not the
-// entity, to avoid implying a scope the server doesn't support:
+// Token-scoped operations — also callable directly on the module using
+// the client's own apiKey instead of a specific instance's token:
 await client.instance.connect({ phone: "5511999999999" });
 await client.instance.pair({ phone: "5511999999999" });
-const { data: qr } = await client.instance.getQr();
-const { data: status } = await client.instance.getStatus();
+const qr = await client.instance.getQr();
+const status = await client.instance.getStatus();
 await client.instance.disconnect();
 await client.instance.reconnect();
 await client.instance.logout();
 
-const { data: all } = await client.instance.getAll();
+const all = await client.instance.getAll();
 ```
 
 ### Label
@@ -224,9 +240,9 @@ await message.react("👍");
 await message.markRead();
 await message.edit("new text");
 await message.delete();
-const { data } = await message.getStatus();
+const status = await message.getStatus();
 
-const { data: media } = await client.message.downloadMedia({ message: rawWebhookMessage });
+const media = await client.message.downloadMedia({ message: rawWebhookMessage });
 ```
 
 ### Send Message
@@ -282,14 +298,16 @@ try {
 
 ## Response types
 
-Every method returns a typed response reconstructed from Evolution GO's
+Every method resolves to a typed value reconstructed from Evolution GO's
 actual Go handlers (the swagger spec only declares a generic, untyped
-`gin.H` for success responses). Most endpoints follow a
-`{ message: string; data: T }` envelope; a few return a bare array or
-object instead (`instance.getLogs`, `label.list`,
-`instance.getAdvancedSettings`) — see each module's exported response
-types (e.g. `GetGroupInfoResponse`, `SendMessageResponse`) for the exact
-shape.
+`gin.H` for success responses). The server wraps most successes as
+`{ message: string; data: T }`; the SDK unwraps that envelope so you get
+`T` directly, and pure confirmation actions (no payload beyond
+`message`) resolve to `void`. A few endpoints return a bare array or
+object with no envelope at all on the wire (`instance.getLogs`,
+`label.list`, `instance.getAdvancedSettings`) — those are unaffected.
+See each module's exported response types (e.g. `GetGroupInfoResponse`,
+`SendMessageResponse`) for the exact shape of `T`.
 
 whatsmeow's `types.JID` has no custom JSON marshaling, so it appears in
 some raw response payloads (`GroupInfo.JID`, etc.) as a `Jid` object
@@ -301,10 +319,16 @@ package root) convert between the two.
 
 `EvolutionGoClient#request<T>(method, path, options?)` and
 `#requestForm<T>(method, path, form)` are the only two transport
-primitives — every module method and entity method is a thin, typed
-wrapper around one of them. To add an endpoint, add a method to the
-relevant module or entity class (or a new module under `src/modules/`)
-rather than calling the transport directly from application code.
+primitives — every module and entity method calls one of them directly
+and unwraps the `{message, data}` envelope itself (`const res = await
+this.#request<XResponse>(...); return res.data;`). To add an endpoint,
+add a method to the relevant module or entity class (or a new module
+under `src/modules/`) the same way, rather than calling the transport
+directly from application code.
+
+`options.apiKey` on `request`/`requestForm` overrides the client's own
+apikey for a single call — this is how `Instance`'s token-scoped methods
+(connect, getStatus, ...) authenticate as that specific instance.
 
 ## API documentation
 

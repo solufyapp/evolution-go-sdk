@@ -31,16 +31,16 @@ export class InstanceModule {
       "GET",
       "/instance/all",
     );
-    return {
-      message: res.message,
-      data: res.data.map((d) => new Instance(d, this.#request)),
-    };
+    return res.data.map((d) => new Instance(d, this.#request));
   }
 
-  connect(body: ConnectBody) {
-    return this.#request<ConnectResponse>("POST", "/instance/connect", {
-      body,
-    });
+  async connect(body: ConnectBody) {
+    const res = await this.#request<ConnectResponse>(
+      "POST",
+      "/instance/connect",
+      { body },
+    );
+    return res.data;
   }
 
   async create(body: CreateInstanceBody) {
@@ -49,28 +49,22 @@ export class InstanceModule {
       "/instance/create",
       { body },
     );
-    return {
-      message: res.message,
-      data: new Instance(res.data, this.#request),
-    };
+    return new Instance(res.data, this.#request);
   }
 
-  delete(instanceId: string) {
-    return this.#request<InstanceActionResponse>(
+  async delete(instanceId: string) {
+    await this.#request<InstanceActionResponse>(
       "DELETE",
       `/instance/delete/${instanceId}`,
     );
   }
 
-  disconnect() {
-    return this.#request<InstanceActionResponse>(
-      "POST",
-      "/instance/disconnect",
-    );
+  async disconnect() {
+    await this.#request<InstanceActionResponse>("POST", "/instance/disconnect");
   }
 
-  forceReconnect(instanceId: string, body?: { number?: string }) {
-    return this.#request<InstanceActionResponse>(
+  async forceReconnect(instanceId: string, body?: { number?: string }) {
+    await this.#request<InstanceActionResponse>(
       "POST",
       `/instance/forcereconnect/${instanceId}`,
       body ? { body } : {},
@@ -82,14 +76,11 @@ export class InstanceModule {
       "GET",
       `/instance/info/${instanceId}`,
     );
-    return {
-      message: res.message,
-      data: new Instance(res.data, this.#request),
-    };
+    return new Instance(res.data, this.#request);
   }
 
-  logout() {
-    return this.#request<InstanceActionResponse>("DELETE", "/instance/logout");
+  async logout() {
+    await this.#request<InstanceActionResponse>("DELETE", "/instance/logout");
   }
 
   getLogs(instanceId: string, query?: GetLogsQuery) {
@@ -98,35 +89,44 @@ export class InstanceModule {
     });
   }
 
-  pair(body: PairBody) {
-    return this.#request<PairResponse>("POST", "/instance/pair", { body });
+  async pair(body: PairBody) {
+    const res = await this.#request<PairResponse>("POST", "/instance/pair", {
+      body,
+    });
+    return res.data;
   }
 
-  setProxy(instanceId: string, body: ProxyConfig) {
-    return this.#request<SetProxyResponse>(
+  async setProxy(instanceId: string, body: ProxyConfig) {
+    const res = await this.#request<SetProxyResponse>(
       "POST",
       `/instance/proxy/${instanceId}`,
       { body },
     );
+    return res.data;
   }
 
-  deleteProxy(instanceId: string) {
-    return this.#request<InstanceActionResponse>(
+  async deleteProxy(instanceId: string) {
+    await this.#request<InstanceActionResponse>(
       "DELETE",
       `/instance/proxy/${instanceId}`,
     );
   }
 
-  getQr() {
-    return this.#request<GetQrResponse>("GET", "/instance/qr");
+  async getQr() {
+    const res = await this.#request<GetQrResponse>("GET", "/instance/qr");
+    return res.data;
   }
 
-  reconnect() {
-    return this.#request<InstanceActionResponse>("POST", "/instance/reconnect");
+  async reconnect() {
+    await this.#request<InstanceActionResponse>("POST", "/instance/reconnect");
   }
 
-  getStatus() {
-    return this.#request<GetStatusResponse>("GET", "/instance/status");
+  async getStatus() {
+    const res = await this.#request<GetStatusResponse>(
+      "GET",
+      "/instance/status",
+    );
+    return res.data;
   }
 
   getAdvancedSettings(instanceId: string) {
@@ -136,11 +136,12 @@ export class InstanceModule {
     );
   }
 
-  updateAdvancedSettings(instanceId: string, settings: AdvancedSettings) {
-    return this.#request<UpdateAdvancedSettingsResponse>(
+  async updateAdvancedSettings(instanceId: string, settings: AdvancedSettings) {
+    const res = await this.#request<UpdateAdvancedSettingsResponse>(
       "PUT",
       `/instance/${instanceId}/advanced-settings`,
       { body: settings },
     );
+    return res.settings;
   }
 }

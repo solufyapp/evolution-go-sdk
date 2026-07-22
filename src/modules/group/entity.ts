@@ -35,46 +35,50 @@ export class Group {
     return this;
   }
 
-  setName(name: string) {
-    return this.#request<GroupActionResponse>("POST", "/group/name", {
+  async setName(name: string) {
+    await this.#request<GroupActionResponse>("POST", "/group/name", {
       body: { groupJid: this.jid, name },
     });
   }
 
-  setDescription(description: string) {
-    return this.#request<GroupActionResponse>("POST", "/group/description", {
+  async setDescription(description: string) {
+    await this.#request<GroupActionResponse>("POST", "/group/description", {
       body: { groupJid: this.jid, description },
     });
   }
 
-  setPhoto(image: string) {
-    return this.#request<SetGroupPhotoResponse>("POST", "/group/photo", {
-      body: { groupJid: this.jid, image },
-    });
+  async setPhoto(image: string) {
+    const res = await this.#request<SetGroupPhotoResponse>(
+      "POST",
+      "/group/photo",
+      { body: { groupJid: this.jid, image } },
+    );
+    return res.data;
   }
 
-  updateParticipants(participants: string[], action: ParticipantChange) {
-    return this.#request<GroupActionResponse>("POST", "/group/participant", {
+  async updateParticipants(participants: string[], action: ParticipantChange) {
+    await this.#request<GroupActionResponse>("POST", "/group/participant", {
       body: { groupJid: this.jid, participants, action },
     });
   }
 
-  updateSettings(action: GroupSettingsAction) {
-    return this.#request<GroupActionResponse>("POST", "/group/settings", {
+  async updateSettings(action: GroupSettingsAction) {
+    await this.#request<GroupActionResponse>("POST", "/group/settings", {
       body: { groupJid: this.jid, action },
     });
   }
 
-  getInviteLink(reset?: boolean) {
-    return this.#request<GetGroupInviteLinkResponse>(
+  async getInviteLink(reset?: boolean) {
+    const res = await this.#request<GetGroupInviteLinkResponse>(
       "POST",
       "/group/invitelink",
       { body: { groupJid: this.jid, reset } },
     );
+    return res.data;
   }
 
-  leave() {
-    return this.#request<GroupActionResponse>("POST", "/group/leave", {
+  async leave() {
+    await this.#request<GroupActionResponse>("POST", "/group/leave", {
       body: { groupJid: this.data.JID },
     });
   }

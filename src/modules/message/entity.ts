@@ -31,42 +31,58 @@ export class Message {
     this.data = data;
   }
 
-  react(
+  async react(
     reaction: string,
     opts: { fromMe?: boolean; participant?: string } = {},
   ) {
-    return this.#request<ReactResponse>("POST", "/message/react", {
+    const res = await this.#request<ReactResponse>("POST", "/message/react", {
       body: { number: this.chat, id: this.id, reaction, ...opts },
     });
+    return res.data;
   }
 
-  markRead() {
-    return this.#request<MessageBatchResponse>("POST", "/message/markread", {
-      body: { number: this.chat, id: [this.id] },
-    });
+  async markRead() {
+    const res = await this.#request<MessageBatchResponse>(
+      "POST",
+      "/message/markread",
+      { body: { number: this.chat, id: [this.id] } },
+    );
+    return res.data;
   }
 
-  markPlayed() {
-    return this.#request<MessageBatchResponse>("POST", "/message/markplayed", {
-      body: { number: this.chat, id: [this.id] },
-    });
+  async markPlayed() {
+    const res = await this.#request<MessageBatchResponse>(
+      "POST",
+      "/message/markplayed",
+      { body: { number: this.chat, id: [this.id] } },
+    );
+    return res.data;
   }
 
-  edit(message: string) {
-    return this.#request<EditMessageResponse>("POST", "/message/edit", {
-      body: { chat: this.chat, messageId: this.id, message },
-    });
+  async edit(message: string) {
+    const res = await this.#request<EditMessageResponse>(
+      "POST",
+      "/message/edit",
+      { body: { chat: this.chat, messageId: this.id, message } },
+    );
+    return res.data;
   }
 
-  delete() {
-    return this.#request<DeleteMessageResponse>("POST", "/message/delete", {
-      body: { chat: this.chat, messageId: this.id },
-    });
+  async delete() {
+    const res = await this.#request<DeleteMessageResponse>(
+      "POST",
+      "/message/delete",
+      { body: { chat: this.chat, messageId: this.id } },
+    );
+    return res.data;
   }
 
-  getStatus() {
-    return this.#request<GetMessageStatusResponse>("POST", "/message/status", {
-      body: { id: this.id },
-    });
+  async getStatus() {
+    const res = await this.#request<GetMessageStatusResponse>(
+      "POST",
+      "/message/status",
+      { body: { id: this.id } },
+    );
+    return res.data;
   }
 }

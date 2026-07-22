@@ -20,32 +20,32 @@ export class LabelModule {
     return data.map((d) => new Label(d, this.#request));
   }
 
-  edit(body: EditLabelBody) {
-    return this.#request<LabelActionResponse>("POST", "/label/edit", {
+  async edit(body: EditLabelBody) {
+    await this.#request<LabelActionResponse>("POST", "/label/edit", {
       body,
     });
   }
 
-  addToChat(body: ChatLabelBody) {
-    return this.#request<LabelActionResponse>("POST", "/label/chat", {
+  async addToChat(body: ChatLabelBody) {
+    await this.#request<LabelActionResponse>("POST", "/label/chat", {
       body,
     });
   }
 
-  removeFromChat(body: ChatLabelBody) {
-    return this.#request<LabelActionResponse>("POST", "/unlabel/chat", {
+  async removeFromChat(body: ChatLabelBody) {
+    await this.#request<LabelActionResponse>("POST", "/unlabel/chat", {
       body,
     });
   }
 
-  addToMessage(body: MessageLabelBody) {
-    return this.#request<LabelActionResponse>("POST", "/label/message", {
+  async addToMessage(body: MessageLabelBody) {
+    await this.#request<LabelActionResponse>("POST", "/label/message", {
       body,
     });
   }
 
-  removeFromMessage(body: MessageLabelBody) {
-    return this.#request<LabelActionResponse>("POST", "/unlabel/message", {
+  async removeFromMessage(body: MessageLabelBody) {
+    await this.#request<LabelActionResponse>("POST", "/unlabel/message", {
       body,
     });
   }

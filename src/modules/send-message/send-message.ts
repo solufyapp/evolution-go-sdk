@@ -51,9 +51,7 @@ export class SendMessageModule {
     const res = await this.#request<SendMessageResponse>(
       "POST",
       "/send/media",
-      {
-        body,
-      },
+      { body },
     );
     return this.#toMessage(res.data);
   }

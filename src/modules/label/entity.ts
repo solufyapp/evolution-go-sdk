@@ -14,32 +14,32 @@ export class Label {
     return this.data.label_id;
   }
 
-  edit(fields: { name?: string; color?: number; deleted?: boolean }) {
-    return this.#request<LabelActionResponse>("POST", "/label/edit", {
+  async edit(fields: { name?: string; color?: number; deleted?: boolean }) {
+    await this.#request<LabelActionResponse>("POST", "/label/edit", {
       body: { labelId: this.id, ...fields },
     });
   }
 
-  addToChat(jid: string) {
-    return this.#request<LabelActionResponse>("POST", "/label/chat", {
+  async addToChat(jid: string) {
+    await this.#request<LabelActionResponse>("POST", "/label/chat", {
       body: { jid, labelId: this.id },
     });
   }
 
-  removeFromChat(jid: string) {
-    return this.#request<LabelActionResponse>("POST", "/unlabel/chat", {
+  async removeFromChat(jid: string) {
+    await this.#request<LabelActionResponse>("POST", "/unlabel/chat", {
       body: { jid, labelId: this.id },
     });
   }
 
-  addToMessage(jid: string, messageId: string) {
-    return this.#request<LabelActionResponse>("POST", "/label/message", {
+  async addToMessage(jid: string, messageId: string) {
+    await this.#request<LabelActionResponse>("POST", "/label/message", {
       body: { jid, labelId: this.id, messageId },
     });
   }
 
-  removeFromMessage(jid: string, messageId: string) {
-    return this.#request<LabelActionResponse>("POST", "/unlabel/message", {
+  async removeFromMessage(jid: string, messageId: string) {
+    await this.#request<LabelActionResponse>("POST", "/unlabel/message", {
       body: { jid, labelId: this.id, messageId },
     });
   }

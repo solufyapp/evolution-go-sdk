@@ -113,4 +113,69 @@ describe("Instance entity", () => {
       { body: { rejectCall: true } },
     );
   });
+
+  it("connect() authenticates with this instance's own token", async () => {
+    const request = makeRequest();
+    const instance = new Instance(data, request);
+    await instance.connect({ phone: "5511999999999" });
+    expect(request).toHaveBeenCalledWith("POST", "/instance/connect", {
+      body: { phone: "5511999999999" },
+      apiKey: "tok",
+    });
+  });
+
+  it("disconnect() authenticates with this instance's own token", async () => {
+    const request = makeRequest();
+    const instance = new Instance(data, request);
+    await instance.disconnect();
+    expect(request).toHaveBeenCalledWith("POST", "/instance/disconnect", {
+      apiKey: "tok",
+    });
+  });
+
+  it("reconnect() authenticates with this instance's own token", async () => {
+    const request = makeRequest();
+    const instance = new Instance(data, request);
+    await instance.reconnect();
+    expect(request).toHaveBeenCalledWith("POST", "/instance/reconnect", {
+      apiKey: "tok",
+    });
+  });
+
+  it("logout() authenticates with this instance's own token", async () => {
+    const request = makeRequest();
+    const instance = new Instance(data, request);
+    await instance.logout();
+    expect(request).toHaveBeenCalledWith("DELETE", "/instance/logout", {
+      apiKey: "tok",
+    });
+  });
+
+  it("getStatus() authenticates with this instance's own token", async () => {
+    const request = makeRequest();
+    const instance = new Instance(data, request);
+    await instance.getStatus();
+    expect(request).toHaveBeenCalledWith("GET", "/instance/status", {
+      apiKey: "tok",
+    });
+  });
+
+  it("getQr() authenticates with this instance's own token", async () => {
+    const request = makeRequest();
+    const instance = new Instance(data, request);
+    await instance.getQr();
+    expect(request).toHaveBeenCalledWith("GET", "/instance/qr", {
+      apiKey: "tok",
+    });
+  });
+
+  it("pair() authenticates with this instance's own token", async () => {
+    const request = makeRequest();
+    const instance = new Instance(data, request);
+    await instance.pair({ phone: "5511999999999" });
+    expect(request).toHaveBeenCalledWith("POST", "/instance/pair", {
+      body: { phone: "5511999999999" },
+      apiKey: "tok",
+    });
+  });
 });

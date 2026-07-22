@@ -119,6 +119,18 @@ describe("EvolutionGoClient transport", () => {
     const headers = fetch.mock.calls[0][1].headers as Record<string, string>;
     expect(headers["Content-Type"]).toBeUndefined();
   });
+
+  it("options.apiKey overrides the client's own apiKey for one call", async () => {
+    const fetch = makeFetch(200, {});
+    const client = new EvolutionGoClient({
+      baseUrl: "https://api.example.com",
+      apiKey: "client-key",
+      fetch,
+    });
+    await client.request("GET", "/test", { apiKey: "override-key" });
+    const headers = fetch.mock.calls[0][1].headers as Record<string, string>;
+    expect(headers.apikey).toBe("override-key");
+  });
 });
 
 describe("EvolutionGoClient forInstance", () => {
@@ -217,5 +229,23 @@ describe("EvolutionGoClient requestForm", () => {
     const headers = fetch.mock.calls[0][1].headers as Record<string, string>;
     expect(headers["Content-Type"]).toBeUndefined();
     expect(headers.apikey).toBe("k");
+  });
+
+  it("apiKey param overrides the client's own apiKey for one call", async () => {
+    const fetch = makeFetch(200, {});
+    const client = new EvolutionGoClient({
+      baseUrl: "https://api.example.com",
+      apiKey: "client-key",
+      fetch,
+    });
+    const form = new FormData();
+    await client.requestForm(
+      "POST",
+      "/send/status/media",
+      form,
+      "override-key",
+    );
+    const headers = fetch.mock.calls[0][1].headers as Record<string, string>;
+    expect(headers.apikey).toBe("override-key");
   });
 });

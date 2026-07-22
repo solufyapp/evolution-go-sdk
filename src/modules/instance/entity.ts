@@ -1,22 +1,21 @@
 import type { AdvancedSettings, ProxyConfig } from "@/shared";
 import type { RequestFn } from "@/transport";
 import type {
+  ConnectBody,
+  ConnectResponse,
   GetInstanceResponse,
   GetLogsQuery,
+  GetQrResponse,
+  GetStatusResponse,
   InstanceActionResponse,
   InstanceData,
   LogEntry,
+  PairBody,
+  PairResponse,
   SetProxyResponse,
   UpdateAdvancedSettingsResponse,
 } from "./types";
 
-/**
- * Only exposes the instanceId-scoped operations. connect/disconnect/
- * reconnect/logout/getStatus/getQr/pair have no id param on the server —
- * they act on whichever instance the client's own apikey authenticates
- * as, not necessarily this one — so they stay flat methods on
- * InstanceModule instead of being bound here.
- */
 export class Instance {
   readonly #request: RequestFn;
   data: InstanceData;
@@ -39,30 +38,31 @@ export class Instance {
     return this;
   }
 
-  delete() {
-    return this.#request<InstanceActionResponse>(
+  async delete() {
+    await this.#request<InstanceActionResponse>(
       "DELETE",
       `/instance/delete/${this.data.id}`,
     );
   }
 
-  setProxy(body: ProxyConfig) {
-    return this.#request<SetProxyResponse>(
+  async setProxy(body: ProxyConfig) {
+    const res = await this.#request<SetProxyResponse>(
       "POST",
       `/instance/proxy/${this.data.id}`,
       { body },
     );
+    return res.data;
   }
 
-  deleteProxy() {
-    return this.#request<InstanceActionResponse>(
+  async deleteProxy() {
+    await this.#request<InstanceActionResponse>(
       "DELETE",
       `/instance/proxy/${this.data.id}`,
     );
   }
 
-  forceReconnect(body?: { number?: string }) {
-    return this.#request<InstanceActionResponse>(
+  async forceReconnect(body?: { number?: string }) {
+    await this.#request<InstanceActionResponse>(
       "POST",
       `/instance/forcereconnect/${this.data.id}`,
       body ? { body } : {},
@@ -82,11 +82,70 @@ export class Instance {
     );
   }
 
-  updateAdvancedSettings(settings: AdvancedSettings) {
-    return this.#request<UpdateAdvancedSettingsResponse>(
+  async updateAdvancedSettings(settings: AdvancedSettings) {
+    const res = await this.#request<UpdateAdvancedSettingsResponse>(
       "PUT",
       `/instance/${this.data.id}/advanced-settings`,
       { body: settings },
     );
+    return res.settings;
+  }
+
+  // The operations below have no instanceId param on the server — they
+  // act on whichever instance the request's apikey authenticates as.
+  // Sending this instance's own token (rather than the parent client's
+  // apiKey) is what makes them correctly scoped to this instance.
+
+  async connect(body: ConnectBody = {}) {
+    const res = await this.#request<ConnectResponse>(
+      "POST",
+      "/instance/connect",
+      { body, apiKey: this.data.token },
+    );
+    return res.data;
+  }
+
+  async disconnect() {
+    await this.#request<InstanceActionResponse>(
+      "POST",
+      "/instance/disconnect",
+      { apiKey: this.data.token },
+    );
+  }
+
+  async reconnect() {
+    await this.#request<InstanceActionResponse>("POST", "/instance/reconnect", {
+      apiKey: this.data.token,
+    });
+  }
+
+  async logout() {
+    await this.#request<InstanceActionResponse>("DELETE", "/instance/logout", {
+      apiKey: this.data.token,
+    });
+  }
+
+  async getStatus() {
+    const res = await this.#request<GetStatusResponse>(
+      "GET",
+      "/instance/status",
+      { apiKey: this.data.token },
+    );
+    return res.data;
+  }
+
+  async getQr() {
+    const res = await this.#request<GetQrResponse>("GET", "/instance/qr", {
+      apiKey: this.data.token,
+    });
+    return res.data;
+  }
+
+  async pair(body: PairBody) {
+    const res = await this.#request<PairResponse>("POST", "/instance/pair", {
+      body,
+      apiKey: this.data.token,
+    });
+    return res.data;
   }
 }

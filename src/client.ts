@@ -85,7 +85,7 @@ export class EvolutionGoClient {
     const res = await this.#fetch(url.toString(), {
       method,
       headers: {
-        apikey: this.#apiKey,
+        apikey: options.apiKey ?? this.#apiKey,
         ...(options.body !== undefined
           ? { "Content-Type": "application/json" }
           : {}),
@@ -106,11 +106,12 @@ export class EvolutionGoClient {
     method: string,
     path: string,
     form: FormData,
+    apiKey?: string,
   ): Promise<T> {
     const url = this.#baseUrl + path;
     const res = await this.#fetch(url, {
       method,
-      headers: { apikey: this.#apiKey },
+      headers: { apikey: apiKey ?? this.#apiKey },
       body: form,
     });
 

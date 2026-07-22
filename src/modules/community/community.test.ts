@@ -20,12 +20,12 @@ describe("CommunityModule", () => {
       },
     } as GroupInfo;
     const r = vi.fn().mockResolvedValue({ message: "success", data });
-    const result = await new CommunityModule(r).create("My Community");
+    const community = await new CommunityModule(r).create("My Community");
     expect(r).toHaveBeenCalledWith("POST", "/community/create", {
       body: { communityName: "My Community" },
     });
-    expect(result.data).toBeInstanceOf(Community);
-    expect(result.data.jid).toBe("123@newsletter");
+    expect(community).toBeInstanceOf(Community);
+    expect(community.jid).toBe("123@newsletter");
   });
 
   it("addParticipants", async () => {

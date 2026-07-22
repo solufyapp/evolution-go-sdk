@@ -27,51 +27,73 @@ export class MessageModule {
     return new Message(identity, this.#request);
   }
 
-  delete(body: DeleteMessageBody) {
-    return this.#request<DeleteMessageResponse>("POST", "/message/delete", {
-      body,
-    });
+  async delete(body: DeleteMessageBody) {
+    const res = await this.#request<DeleteMessageResponse>(
+      "POST",
+      "/message/delete",
+      { body },
+    );
+    return res.data;
   }
 
-  downloadMedia(body: DownloadMediaBody) {
-    return this.#request<DownloadMediaResponse>(
+  async downloadMedia(body: DownloadMediaBody) {
+    const res = await this.#request<DownloadMediaResponse>(
       "POST",
       "/message/downloadmedia",
       { body },
     );
+    return res.data;
   }
 
-  edit(body: EditMessageBody) {
-    return this.#request<EditMessageResponse>("POST", "/message/edit", {
+  async edit(body: EditMessageBody) {
+    const res = await this.#request<EditMessageResponse>(
+      "POST",
+      "/message/edit",
+      { body },
+    );
+    return res.data;
+  }
+
+  async markPlayed(body: MessageBatchBody) {
+    const res = await this.#request<MessageBatchResponse>(
+      "POST",
+      "/message/markplayed",
+      { body },
+    );
+    return res.data;
+  }
+
+  async markRead(body: MessageBatchBody) {
+    const res = await this.#request<MessageBatchResponse>(
+      "POST",
+      "/message/markread",
+      { body },
+    );
+    return res.data;
+  }
+
+  async setPresence(body: SetPresenceBody) {
+    const res = await this.#request<MessageBatchResponse>(
+      "POST",
+      "/message/presence",
+      { body },
+    );
+    return res.data;
+  }
+
+  async react(body: ReactBody) {
+    const res = await this.#request<ReactResponse>("POST", "/message/react", {
       body,
     });
+    return res.data;
   }
 
-  markPlayed(body: MessageBatchBody) {
-    return this.#request<MessageBatchResponse>("POST", "/message/markplayed", {
-      body,
-    });
-  }
-
-  markRead(body: MessageBatchBody) {
-    return this.#request<MessageBatchResponse>("POST", "/message/markread", {
-      body,
-    });
-  }
-
-  setPresence(body: SetPresenceBody) {
-    return this.#request<MessageBatchResponse>("POST", "/message/presence", {
-      body,
-    });
-  }
-
-  react(body: ReactBody) {
-    return this.#request<ReactResponse>("POST", "/message/react", { body });
-  }
-
-  getStatus(id: string) {
-    return this.#request<GetMessageStatusResponse>("POST", "/message/status", {
-      body: { id },
-    });
+  async getStatus(id: string) {
+    const res = await this.#request<GetMessageStatusResponse>(
+      "POST",
+      "/message/status",
+      { body: { id } },
+    );
+    return res.data;
   }
 }

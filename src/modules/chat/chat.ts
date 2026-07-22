@@ -18,47 +18,60 @@ export class ChatModule {
     return new Chat(jid, this.#request);
   }
 
-  archive(chat: string) {
-    return this.#request<ChatActionResponse>("POST", "/chat/archive", {
-      body: { chat },
-    });
+  async archive(chat: string) {
+    const res = await this.#request<ChatActionResponse>(
+      "POST",
+      "/chat/archive",
+      { body: { chat } },
+    );
+    return res.data;
   }
 
-  unarchive(chat: string) {
-    return this.#request<ChatActionResponse>("POST", "/chat/unarchive", {
-      body: { chat },
-    });
+  async unarchive(chat: string) {
+    const res = await this.#request<ChatActionResponse>(
+      "POST",
+      "/chat/unarchive",
+      { body: { chat } },
+    );
+    return res.data;
   }
 
-  mute(chat: string) {
-    return this.#request<ChatActionResponse>("POST", "/chat/mute", {
+  async mute(chat: string) {
+    const res = await this.#request<ChatActionResponse>("POST", "/chat/mute", {
       body: { chat },
     });
+    return res.data;
   }
 
-  unmute(chat: string) {
-    return this.#request<ChatActionResponse>("POST", "/chat/unmute", {
+  async unmute(chat: string) {
+    const res = await this.#request<ChatActionResponse>(
+      "POST",
+      "/chat/unmute",
+      { body: { chat } },
+    );
+    return res.data;
+  }
+
+  async pin(chat: string) {
+    const res = await this.#request<ChatActionResponse>("POST", "/chat/pin", {
       body: { chat },
     });
+    return res.data;
   }
 
-  pin(chat: string) {
-    return this.#request<ChatActionResponse>("POST", "/chat/pin", {
+  async unpin(chat: string) {
+    const res = await this.#request<ChatActionResponse>("POST", "/chat/unpin", {
       body: { chat },
     });
+    return res.data;
   }
 
-  unpin(chat: string) {
-    return this.#request<ChatActionResponse>("POST", "/chat/unpin", {
-      body: { chat },
-    });
-  }
-
-  historySyncRequest(body: HistorySyncRequestBody) {
-    return this.#request<HistorySyncRequestResponse>(
+  async historySyncRequest(body: HistorySyncRequestBody) {
+    const res = await this.#request<HistorySyncRequestResponse>(
       "POST",
       "/chat/history-sync",
       { body },
     );
+    return res.data;
   }
 }

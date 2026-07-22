@@ -41,8 +41,8 @@ describe("InstanceModule", () => {
       .mockResolvedValue({ message: "success", data: [instanceData] });
     const result = await new InstanceModule(r).getAll();
     expect(r).toHaveBeenCalledWith("GET", "/instance/all");
-    expect(result.data[0]).toBeInstanceOf(Instance);
-    expect(result.data[0]?.id).toBe("inst-123");
+    expect(result[0]).toBeInstanceOf(Instance);
+    expect(result[0]?.id).toBe("inst-123");
   });
 
   it("connect -> POST /instance/connect", async () => {
@@ -61,8 +61,8 @@ describe("InstanceModule", () => {
     expect(r).toHaveBeenCalledWith("POST", "/instance/create", {
       body: { name: "my-instance" },
     });
-    expect(result.data).toBeInstanceOf(Instance);
-    expect(result.data.id).toBe("inst-123");
+    expect(result).toBeInstanceOf(Instance);
+    expect(result.id).toBe("inst-123");
   });
 
   it("delete -> DELETE /instance/delete/{id}", async () => {
@@ -93,8 +93,8 @@ describe("InstanceModule", () => {
       .mockResolvedValue({ message: "success", data: instanceData });
     const result = await new InstanceModule(r).getInfo("inst-123");
     expect(r).toHaveBeenCalledWith("GET", "/instance/info/inst-123");
-    expect(result.data).toBeInstanceOf(Instance);
-    expect(result.data.id).toBe("inst-123");
+    expect(result).toBeInstanceOf(Instance);
+    expect(result.id).toBe("inst-123");
   });
 
   it("logout -> DELETE /instance/logout", async () => {

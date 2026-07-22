@@ -19,25 +19,24 @@ export class CommunityModule {
       "/community/create",
       { body: { communityName } },
     );
-    return {
-      message: res.message,
-      data: new Community(res.data, this.#request),
-    };
+    return new Community(res.data, this.#request);
   }
 
-  addParticipants(body: CommunityParticipantBody) {
-    return this.#request<CommunityParticipantResponse>(
+  async addParticipants(body: CommunityParticipantBody) {
+    const res = await this.#request<CommunityParticipantResponse>(
       "POST",
       "/community/add",
       { body },
     );
+    return res.data;
   }
 
-  removeParticipants(body: CommunityParticipantBody) {
-    return this.#request<CommunityParticipantResponse>(
+  async removeParticipants(body: CommunityParticipantBody) {
+    const res = await this.#request<CommunityParticipantResponse>(
       "POST",
       "/community/remove",
       { body },
     );
+    return res.data;
   }
 }

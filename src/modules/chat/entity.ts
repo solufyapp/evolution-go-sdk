@@ -16,39 +16,51 @@ export class Chat {
     this.#request = request;
   }
 
-  archive() {
-    return this.#request<ChatActionResponse>("POST", "/chat/archive", {
-      body: { chat: this.jid },
-    });
+  async archive() {
+    const res = await this.#request<ChatActionResponse>(
+      "POST",
+      "/chat/archive",
+      { body: { chat: this.jid } },
+    );
+    return res.data;
   }
 
-  unarchive() {
-    return this.#request<ChatActionResponse>("POST", "/chat/unarchive", {
-      body: { chat: this.jid },
-    });
+  async unarchive() {
+    const res = await this.#request<ChatActionResponse>(
+      "POST",
+      "/chat/unarchive",
+      { body: { chat: this.jid } },
+    );
+    return res.data;
   }
 
-  mute() {
-    return this.#request<ChatActionResponse>("POST", "/chat/mute", {
+  async mute() {
+    const res = await this.#request<ChatActionResponse>("POST", "/chat/mute", {
       body: { chat: this.jid },
     });
+    return res.data;
   }
 
-  unmute() {
-    return this.#request<ChatActionResponse>("POST", "/chat/unmute", {
-      body: { chat: this.jid },
-    });
+  async unmute() {
+    const res = await this.#request<ChatActionResponse>(
+      "POST",
+      "/chat/unmute",
+      { body: { chat: this.jid } },
+    );
+    return res.data;
   }
 
-  pin() {
-    return this.#request<ChatActionResponse>("POST", "/chat/pin", {
+  async pin() {
+    const res = await this.#request<ChatActionResponse>("POST", "/chat/pin", {
       body: { chat: this.jid },
     });
+    return res.data;
   }
 
-  unpin() {
-    return this.#request<ChatActionResponse>("POST", "/chat/unpin", {
+  async unpin() {
+    const res = await this.#request<ChatActionResponse>("POST", "/chat/unpin", {
       body: { chat: this.jid },
     });
+    return res.data;
   }
 }

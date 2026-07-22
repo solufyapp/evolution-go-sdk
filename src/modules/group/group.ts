@@ -31,7 +31,7 @@ export class GroupModule {
    * recurring auto-refresh pattern.
    */
   async create(body: CreateGroupBody) {
-    const res = await this.#request<CreateGroupResponse>(
+    const created = await this.#request<CreateGroupResponse>(
       "POST",
       "/group/create",
       { body },
@@ -39,16 +39,13 @@ export class GroupModule {
     const info = await this.#request<GetGroupInfoResponse>(
       "POST",
       "/group/info",
-      { body: { groupJid: jidToString(res.data.jid) } },
+      { body: { groupJid: jidToString(created.data.jid) } },
     );
-    return {
-      message: res.message,
-      data: new Group(info.data, this.#request),
-    };
+    return new Group(info.data, this.#request);
   }
 
-  setDescription(body: SetGroupDescriptionBody) {
-    return this.#request<GroupActionResponse>("POST", "/group/description", {
+  async setDescription(body: SetGroupDescriptionBody) {
+    await this.#request<GroupActionResponse>("POST", "/group/description", {
       body,
     });
   }
@@ -59,65 +56,61 @@ export class GroupModule {
       "/group/info",
       { body: { groupJid } },
     );
-    return { message: res.message, data: new Group(res.data, this.#request) };
+    return new Group(res.data, this.#request);
   }
 
-  getInviteLink(body: GetGroupInviteLinkBody) {
-    return this.#request<GetGroupInviteLinkResponse>(
+  async getInviteLink(body: GetGroupInviteLinkBody) {
+    const res = await this.#request<GetGroupInviteLinkResponse>(
       "POST",
       "/group/invitelink",
       { body },
     );
+    return res.data;
   }
 
-  join(code: string) {
-    return this.#request<GroupActionResponse>("POST", "/group/join", {
+  async join(code: string) {
+    await this.#request<GroupActionResponse>("POST", "/group/join", {
       body: { code },
     });
   }
 
-  leave(groupJid: string) {
-    return this.#request<GroupActionResponse>("POST", "/group/leave", {
+  async leave(groupJid: string) {
+    await this.#request<GroupActionResponse>("POST", "/group/leave", {
       body: { groupJid: parseJid(groupJid) },
     });
   }
 
   async list() {
     const res = await this.#request<ListGroupsResponse>("GET", "/group/list");
-    return {
-      message: res.message,
-      data: res.data.map((d) => new Group(d, this.#request)),
-    };
+    return res.data.map((d) => new Group(d, this.#request));
   }
 
   async myGroups() {
     const res = await this.#request<ListGroupsResponse>("GET", "/group/myall");
-    return {
-      message: res.message,
-      data: res.data.map((d) => new Group(d, this.#request)),
-    };
+    return res.data.map((d) => new Group(d, this.#request));
   }
 
-  setName(body: SetGroupNameBody) {
-    return this.#request<GroupActionResponse>("POST", "/group/name", {
+  async setName(body: SetGroupNameBody) {
+    await this.#request<GroupActionResponse>("POST", "/group/name", { body });
+  }
+
+  async updateParticipants(body: UpdateParticipantsBody) {
+    await this.#request<GroupActionResponse>("POST", "/group/participant", {
       body,
     });
   }
 
-  updateParticipants(body: UpdateParticipantsBody) {
-    return this.#request<GroupActionResponse>("POST", "/group/participant", {
-      body,
-    });
+  async setPhoto(body: SetGroupPhotoBody) {
+    const res = await this.#request<SetGroupPhotoResponse>(
+      "POST",
+      "/group/photo",
+      { body },
+    );
+    return res.data;
   }
 
-  setPhoto(body: SetGroupPhotoBody) {
-    return this.#request<SetGroupPhotoResponse>("POST", "/group/photo", {
-      body,
-    });
-  }
-
-  updateSettings(body: UpdateGroupSettingsBody) {
-    return this.#request<GroupActionResponse>("POST", "/group/settings", {
+  async updateSettings(body: UpdateGroupSettingsBody) {
+    await this.#request<GroupActionResponse>("POST", "/group/settings", {
       body,
     });
   }
