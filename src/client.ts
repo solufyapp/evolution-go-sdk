@@ -1,3 +1,4 @@
+import type { Instance } from "./modules/instance";
 import type { RequestOptions } from "./transport";
 import { EvolutionGoApiError } from "./errors";
 import { CallModule } from "./modules/call";
@@ -45,6 +46,26 @@ export class EvolutionGoClient {
       this.request.bind(this),
       this.requestForm.bind(this),
     );
+  }
+
+  /**
+   * Every module besides Instance's own id-scoped operations is scoped
+   * implicitly by whichever apikey the request authenticates with — there's
+   * no instanceId param on chat/group/message/send/etc. So "a client for
+   * this instance" is just a new client using that instance's token.
+   * Accepts either the token string directly or an Instance entity
+   * (its .data.token is used).
+   */
+  forInstance(tokenOrInstance: string | Instance): EvolutionGoClient {
+    const apiKey =
+      typeof tokenOrInstance === "string"
+        ? tokenOrInstance
+        : tokenOrInstance.data.token;
+    return new EvolutionGoClient({
+      baseUrl: this.#baseUrl,
+      apiKey,
+      fetch: this.#fetch,
+    });
   }
 
   async request<T>(

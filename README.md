@@ -39,6 +39,24 @@ The `apikey` header is sent on every request — either a global key or an
 instance-specific token (returned by `client.instance.create`), per
 Evolution GO's convention.
 
+### Scoping a client to one instance
+
+Every module besides Instance's own id-scoped operations (chat, group,
+message, sendMessage, label, community, call) is scoped implicitly by
+whichever `apikey` a request authenticates with — there's no
+`instanceId` param on those endpoints at all. So "a client for one
+instance" is just a new client using that instance's token, which
+`forInstance` gives you:
+
+```ts
+const admin = new EvolutionGoClient({ baseUrl, apiKey: globalKey });
+const { data: instance } = await admin.instance.getInfo("inst-123");
+
+const instanceClient = admin.forInstance(instance); // or admin.forInstance(instance.data.token)
+await instanceClient.chat.archive("5511999999999@s.whatsapp.net");
+await instanceClient.sendMessage.text({ number: "5511999999999", text: "Hi!" });
+```
+
 ## Modules
 
 The client exposes one namespace per API tag:

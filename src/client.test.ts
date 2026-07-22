@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { EvolutionGoClient } from "./client";
 import { EvolutionGoApiError } from "./errors";
+import { Instance } from "./modules/instance";
 
 function makeFetch(status: number, body: unknown) {
   return vi.fn().mockResolvedValue({
@@ -117,6 +118,88 @@ describe("EvolutionGoClient transport", () => {
     await client.request("GET", "/test");
     const headers = fetch.mock.calls[0][1].headers as Record<string, string>;
     expect(headers["Content-Type"]).toBeUndefined();
+  });
+});
+
+describe("EvolutionGoClient forInstance", () => {
+  it("returns a new client scoped to a token string", async () => {
+    const fetch = makeFetch(200, {});
+    const client = new EvolutionGoClient({
+      baseUrl: "https://api.example.com/",
+      apiKey: "admin-key",
+      fetch,
+    });
+    const scoped = client.forInstance("instance-token");
+    expect(scoped).not.toBe(client);
+    await scoped.request("GET", "/test");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/test",
+      expect.objectContaining({
+        headers: expect.objectContaining({ apikey: "instance-token" }),
+      }),
+    );
+  });
+
+  it("returns a new client scoped to an Instance entity's token", async () => {
+    const fetch = makeFetch(200, {});
+    const client = new EvolutionGoClient({
+      baseUrl: "https://api.example.com",
+      apiKey: "admin-key",
+      fetch,
+    });
+    const instance = new Instance(
+      {
+        id: "inst-1",
+        name: "my-instance",
+        token: "instance-token",
+        webhook: "",
+        rabbitmqEnable: "",
+        websocketEnable: "",
+        natsEnable: "",
+        jid: "",
+        qrcode: "",
+        connected: true,
+        expiration: 0,
+        disconnect_reason: "",
+        events: "",
+        os_name: "",
+        proxy: "",
+        client_name: "",
+        createdAt: "",
+        alwaysOnline: false,
+        rejectCall: false,
+        msgRejectCall: "",
+        readMessages: false,
+        ignoreGroups: false,
+        ignoreStatus: false,
+      },
+      client.request.bind(client),
+    );
+    const scoped = client.forInstance(instance);
+    await scoped.request("GET", "/test");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/test",
+      expect.objectContaining({
+        headers: expect.objectContaining({ apikey: "instance-token" }),
+      }),
+    );
+  });
+
+  it("preserves baseUrl and fetch from the parent client", async () => {
+    const fetch = makeFetch(200, {});
+    const client = new EvolutionGoClient({
+      baseUrl: "https://api.example.com",
+      apiKey: "admin-key",
+      fetch,
+    });
+    const scoped = client.forInstance("instance-token");
+    await scoped.chat.archive("chat@s.whatsapp.net");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/chat/archive",
+      expect.objectContaining({
+        headers: expect.objectContaining({ apikey: "instance-token" }),
+      }),
+    );
   });
 });
 
