@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { Message } from "./entity";
 import { MessageModule } from "./message";
 
 function makeRequest() {
@@ -7,6 +8,18 @@ function makeRequest() {
 }
 
 describe("MessageModule", () => {
+  it("from() builds a Message handle without a network call", () => {
+    const r = makeRequest();
+    const message = new MessageModule(r).from({
+      chat: "1@s.whatsapp.net",
+      id: "msg-1",
+    });
+    expect(message).toBeInstanceOf(Message);
+    expect(message.chat).toBe("1@s.whatsapp.net");
+    expect(message.id).toBe("msg-1");
+    expect(r).not.toHaveBeenCalled();
+  });
+
   it("delete -> POST /message/delete", async () => {
     const r = makeRequest();
     await new MessageModule(r).delete({

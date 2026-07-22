@@ -28,3 +28,18 @@ export function parseJid(jid: string): Jid {
     Integrator: 0,
   };
 }
+
+/**
+ * Inverse of parseJid — formats a Jid object (as returned inside raw
+ * response payloads like GroupInfo.JID) back into whatsmeow's own
+ * "user@server" string format, mirroring whatsmeow's JID#String().
+ */
+export function jidToString(jid: Jid): string {
+  if (jid.RawAgent > 0) {
+    return `${jid.User}.${jid.RawAgent}:${jid.Device}@${jid.Server}`;
+  }
+  if (jid.Device > 0) {
+    return `${jid.User}:${jid.Device}@${jid.Server}`;
+  }
+  return `${jid.User}@${jid.Server}`;
+}

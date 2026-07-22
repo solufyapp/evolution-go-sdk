@@ -13,4 +13,5 @@ export type {
   ReactResponse,
   SetPresenceBody,
 } from "./types";
+export { Message } from "./entity";
 export { MessageModule } from "./message";

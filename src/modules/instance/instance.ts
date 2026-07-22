@@ -17,6 +17,7 @@ import type {
   SetProxyResponse,
   UpdateAdvancedSettingsResponse,
 } from "./types";
+import { Instance } from "./entity";
 
 export class InstanceModule {
   readonly #request: RequestFn;
@@ -25,8 +26,15 @@ export class InstanceModule {
     this.#request = request;
   }
 
-  getAll() {
-    return this.#request<GetAllInstancesResponse>("GET", "/instance/all");
+  async getAll() {
+    const res = await this.#request<GetAllInstancesResponse>(
+      "GET",
+      "/instance/all",
+    );
+    return {
+      message: res.message,
+      data: res.data.map((d) => new Instance(d, this.#request)),
+    };
   }
 
   connect(body: ConnectBody) {
@@ -35,10 +43,16 @@ export class InstanceModule {
     });
   }
 
-  create(body: CreateInstanceBody) {
-    return this.#request<CreateInstanceResponse>("POST", "/instance/create", {
-      body,
-    });
+  async create(body: CreateInstanceBody) {
+    const res = await this.#request<CreateInstanceResponse>(
+      "POST",
+      "/instance/create",
+      { body },
+    );
+    return {
+      message: res.message,
+      data: new Instance(res.data, this.#request),
+    };
   }
 
   delete(instanceId: string) {
@@ -63,11 +77,15 @@ export class InstanceModule {
     );
   }
 
-  getInfo(instanceId: string) {
-    return this.#request<GetInstanceResponse>(
+  async getInfo(instanceId: string) {
+    const res = await this.#request<GetInstanceResponse>(
       "GET",
       `/instance/info/${instanceId}`,
     );
+    return {
+      message: res.message,
+      data: new Instance(res.data, this.#request),
+    };
   }
 
   logout() {

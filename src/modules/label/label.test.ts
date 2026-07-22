@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { Label } from "./entity";
 import { LabelModule } from "./label";
 
 function makeRequest() {
@@ -7,10 +8,21 @@ function makeRequest() {
 }
 
 describe("LabelModule", () => {
-  it("list -> GET /label/list", async () => {
-    const r = makeRequest();
-    await new LabelModule(r).list();
+  it("list -> GET /label/list, wraps each item in a Label entity", async () => {
+    const r = vi.fn().mockResolvedValue([
+      {
+        id: "row-1",
+        instance_id: "inst-1",
+        label_id: "lbl-1",
+        label_name: "Urgent",
+        label_color: "2",
+        predefined_id: "",
+      },
+    ]);
+    const result = await new LabelModule(r).list();
     expect(r).toHaveBeenCalledWith("GET", "/label/list");
+    expect(result[0]).toBeInstanceOf(Label);
+    expect(result[0]?.id).toBe("lbl-1");
   });
 
   it("edit -> POST /label/edit", async () => {

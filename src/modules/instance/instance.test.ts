@@ -1,16 +1,48 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { InstanceData } from "./types";
+import { Instance } from "./entity";
 import { InstanceModule } from "./instance";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});
 }
 
+const instanceData: InstanceData = {
+  id: "inst-123",
+  name: "my-instance",
+  token: "tok",
+  webhook: "",
+  rabbitmqEnable: "",
+  websocketEnable: "",
+  natsEnable: "",
+  jid: "",
+  qrcode: "",
+  connected: false,
+  expiration: 0,
+  disconnect_reason: "",
+  events: "",
+  os_name: "",
+  proxy: "",
+  client_name: "",
+  createdAt: "",
+  alwaysOnline: false,
+  rejectCall: false,
+  msgRejectCall: "",
+  readMessages: false,
+  ignoreGroups: false,
+  ignoreStatus: false,
+};
+
 describe("InstanceModule", () => {
-  it("getAll -> GET /instance/all", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).getAll();
+  it("getAll -> GET /instance/all, wraps each item in an Instance entity", async () => {
+    const r = vi
+      .fn()
+      .mockResolvedValue({ message: "success", data: [instanceData] });
+    const result = await new InstanceModule(r).getAll();
     expect(r).toHaveBeenCalledWith("GET", "/instance/all");
+    expect(result.data[0]).toBeInstanceOf(Instance);
+    expect(result.data[0]?.id).toBe("inst-123");
   });
 
   it("connect -> POST /instance/connect", async () => {
@@ -21,12 +53,16 @@ describe("InstanceModule", () => {
     });
   });
 
-  it("create -> POST /instance/create", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).create({ name: "my-instance" });
+  it("create -> POST /instance/create, returns an Instance entity", async () => {
+    const r = vi
+      .fn()
+      .mockResolvedValue({ message: "success", data: instanceData });
+    const result = await new InstanceModule(r).create({ name: "my-instance" });
     expect(r).toHaveBeenCalledWith("POST", "/instance/create", {
       body: { name: "my-instance" },
     });
+    expect(result.data).toBeInstanceOf(Instance);
+    expect(result.data.id).toBe("inst-123");
   });
 
   it("delete -> DELETE /instance/delete/{id}", async () => {
@@ -51,10 +87,14 @@ describe("InstanceModule", () => {
     );
   });
 
-  it("getInfo -> GET /instance/info/{id}", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).getInfo("inst-123");
+  it("getInfo -> GET /instance/info/{id}, returns an Instance entity", async () => {
+    const r = vi
+      .fn()
+      .mockResolvedValue({ message: "success", data: instanceData });
+    const result = await new InstanceModule(r).getInfo("inst-123");
     expect(r).toHaveBeenCalledWith("GET", "/instance/info/inst-123");
+    expect(result.data).toBeInstanceOf(Instance);
+    expect(result.data.id).toBe("inst-123");
   });
 
   it("logout -> DELETE /instance/logout", async () => {

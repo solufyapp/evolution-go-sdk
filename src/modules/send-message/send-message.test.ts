@@ -1,10 +1,30 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { Message } from "@/modules/message/entity";
 import { SendMessageModule } from "./send-message";
 
+const sendResult = {
+  Info: {
+    Chat: {
+      User: "5511999999999",
+      Server: "s.whatsapp.net",
+      Device: 0,
+      RawAgent: 0,
+      Integrator: 0,
+    },
+    ID: "msg-1",
+  },
+  Message: null,
+  MessageContextInfo: null,
+};
+
 function makeSpies() {
-  const request = vi.fn().mockResolvedValue({});
-  const requestForm = vi.fn().mockResolvedValue({});
+  const request = vi
+    .fn()
+    .mockResolvedValue({ message: "success", data: sendResult });
+  const requestForm = vi
+    .fn()
+    .mockResolvedValue({ message: "success", data: sendResult });
   return {
     request,
     requestForm,
@@ -13,12 +33,16 @@ function makeSpies() {
 }
 
 describe("SendMessageModule", () => {
-  it("text -> POST /send/text", async () => {
+  it("text -> POST /send/text, returns a Message entity", async () => {
     const { request, module } = makeSpies();
-    await module.text({ number: "5511999999999", text: "hi" });
+    const message = await module.text({ number: "5511999999999", text: "hi" });
     expect(request).toHaveBeenCalledWith("POST", "/send/text", {
       body: { number: "5511999999999", text: "hi" },
     });
+    expect(message).toBeInstanceOf(Message);
+    expect(message.chat).toBe("5511999999999@s.whatsapp.net");
+    expect(message.id).toBe("msg-1");
+    expect(message.data).toBe(sendResult);
   });
 
   it("media -> POST /send/media", async () => {
@@ -165,9 +189,9 @@ describe("SendMessageModule", () => {
     });
   });
 
-  it("statusMedia uses requestForm with FormData", async () => {
+  it("statusMedia uses requestForm with FormData, returns a Message entity", async () => {
     const { requestForm, module } = makeSpies();
-    await module.statusMedia({
+    const message = await module.statusMedia({
       type: "image",
       url: "https://example.com/img.jpg",
     });
@@ -179,6 +203,7 @@ describe("SendMessageModule", () => {
     const form: FormData = requestForm.mock.calls[0][2];
     expect(form.get("type")).toBe("image");
     expect(form.get("url")).toBe("https://example.com/img.jpg");
+    expect(message).toBeInstanceOf(Message);
   });
 
   it("statusMedia with file uses file in FormData", async () => {

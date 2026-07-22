@@ -8,12 +8,13 @@ export type {
   GetLogsQuery,
   GetQrResponse,
   GetStatusResponse,
-  Instance,
   InstanceActionResponse,
+  InstanceData,
   LogEntry,
   PairBody,
   PairResponse,
   SetProxyResponse,
   UpdateAdvancedSettingsResponse,
 } from "./types";
+export { Instance } from "./entity";
 export { InstanceModule } from "./instance";

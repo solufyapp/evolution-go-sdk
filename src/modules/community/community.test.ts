@@ -1,18 +1,31 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { GroupInfo } from "@/shared";
 import { CommunityModule } from "./community";
+import { Community } from "./entity";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});
 }
 
 describe("CommunityModule", () => {
-  it("create", async () => {
-    const r = makeRequest();
-    await new CommunityModule(r).create("My Community");
+  it("create returns a Community entity", async () => {
+    const data = {
+      JID: {
+        User: "123",
+        Server: "newsletter",
+        Device: 0,
+        RawAgent: 0,
+        Integrator: 0,
+      },
+    } as GroupInfo;
+    const r = vi.fn().mockResolvedValue({ message: "success", data });
+    const result = await new CommunityModule(r).create("My Community");
     expect(r).toHaveBeenCalledWith("POST", "/community/create", {
       body: { communityName: "My Community" },
     });
+    expect(result.data).toBeInstanceOf(Community);
+    expect(result.data.jid).toBe("123@newsletter");
   });
 
   it("addParticipants", async () => {

@@ -4,3 +4,4 @@ export type {
   CreateCommunityResponse,
 } from "./types";
 export { CommunityModule } from "./community";
+export { Community } from "./entity";

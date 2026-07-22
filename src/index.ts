@@ -35,8 +35,8 @@ export type {
   GetLogsQuery,
   GetQrResponse,
   GetStatusResponse,
-  Instance,
   InstanceActionResponse,
+  InstanceData,
   LogEntry,
   PairBody,
   PairResponse,
@@ -46,8 +46,8 @@ export type {
 export type {
   ChatLabelBody,
   EditLabelBody,
-  Label,
   LabelActionResponse,
+  LabelData,
   MessageLabelBody,
 } from "./modules/label";
 export type {
@@ -108,4 +108,10 @@ export type {
 export type { RequestFn, RequestFormFn, RequestOptions } from "./transport";
 export { EvolutionGoClient } from "./client";
 export { EvolutionGoApiError } from "./errors";
-export { parseJid } from "./jid";
+export { jidToString, parseJid } from "./jid";
+export { Chat } from "./modules/chat";
+export { Community } from "./modules/community";
+export { Group } from "./modules/group";
+export { Instance } from "./modules/instance";
+export { Label } from "./modules/label";
+export { Message } from "./modules/message";

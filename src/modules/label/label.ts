@@ -2,10 +2,11 @@ import type { RequestFn } from "@/transport";
 import type {
   ChatLabelBody,
   EditLabelBody,
-  Label,
   LabelActionResponse,
+  LabelData,
   MessageLabelBody,
 } from "./types";
+import { Label } from "./entity";
 
 export class LabelModule {
   readonly #request: RequestFn;
@@ -14,8 +15,9 @@ export class LabelModule {
     this.#request = request;
   }
 
-  list() {
-    return this.#request<Label[]>("GET", "/label/list");
+  async list() {
+    const data = await this.#request<LabelData[]>("GET", "/label/list");
+    return data.map((d) => new Label(d, this.#request));
   }
 
   edit(body: EditLabelBody) {

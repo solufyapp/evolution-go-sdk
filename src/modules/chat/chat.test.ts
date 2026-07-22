@@ -1,12 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { ChatModule } from "./chat";
+import { Chat } from "./entity";
 
 function makeRequest() {
   return vi.fn().mockResolvedValue({});
 }
 
 describe("ChatModule", () => {
+  it("from() builds a Chat handle without a network call", () => {
+    const r = makeRequest();
+    const chat = new ChatModule(r).from("chat@s.whatsapp.net");
+    expect(chat).toBeInstanceOf(Chat);
+    expect(chat.jid).toBe("chat@s.whatsapp.net");
+    expect(r).not.toHaveBeenCalled();
+  });
+
   it("archive", async () => {
     const r = makeRequest();
     await new ChatModule(r).archive("chat@s.whatsapp.net");

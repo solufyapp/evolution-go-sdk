@@ -4,6 +4,7 @@ import type {
   CommunityParticipantResponse,
   CreateCommunityResponse,
 } from "./types";
+import { Community } from "./entity";
 
 export class CommunityModule {
   readonly #request: RequestFn;
@@ -12,10 +13,16 @@ export class CommunityModule {
     this.#request = request;
   }
 
-  create(communityName: string) {
-    return this.#request<CreateCommunityResponse>("POST", "/community/create", {
-      body: { communityName },
-    });
+  async create(communityName: string) {
+    const res = await this.#request<CreateCommunityResponse>(
+      "POST",
+      "/community/create",
+      { body: { communityName } },
+    );
+    return {
+      message: res.message,
+      data: new Community(res.data, this.#request),
+    };
   }
 
   addParticipants(body: CommunityParticipantBody) {

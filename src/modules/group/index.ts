@@ -13,4 +13,5 @@ export type {
   UpdateGroupSettingsBody,
   UpdateParticipantsBody,
 } from "./types";
+export { Group } from "./entity";
 export { GroupModule } from "./group";

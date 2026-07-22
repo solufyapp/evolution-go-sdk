@@ -25,7 +25,7 @@ const client = new EvolutionGoClient({
 
 try {
   const { data: instances } = await client.instance.getAll();
-  console.log(instances.map((i) => `${i.name} (connected: ${i.connected})`));
+  console.log(instances.map((i) => `${i.data.name} (connected: ${i.data.connected})`));
 } catch (err) {
   if (err instanceof EvolutionGoApiError) {
     console.error(err.status, err.message, err.body);
@@ -41,19 +41,73 @@ Evolution GO's convention.
 
 ## Modules
 
-The client exposes one namespace per API tag, each returning typed
-responses:
+The client exposes one namespace per API tag:
 
 ```ts
 client.call            // Call
 client.chat            // Chat
 client.community       // Community
-client.group           // Group
-client.instance        // Instance
-client.label           // Label
-client.message         // Message
-client.sendMessage     // Send Message
+client.group            // Group
+client.instance         // Instance
+client.label            // Label
+client.message          // Message
+client.sendMessage      // Send Message
 ```
+
+## Entities
+
+Fetching or creating an Instance, Group, Label, or Community returns a
+rich object, not just data — it carries both the underlying data (in
+`.data`) and bound methods for the actions that scope to that identity:
+
+```ts
+const { data: instance } = await client.instance.create({
+  name: "my-instance",
+  token: "some-secret-token",
+});
+await instance.setProxy({ host: "proxy.example.com", port: "8080" });
+await instance.getAdvancedSettings();
+await instance.delete();
+
+const { data: group } = await client.group.getInfo("123456789-987654321@g.us");
+await group.setName("New name");
+await group.updateSettings("locked");
+await group.leave();
+await group.refresh(); // re-fetch to pick up changes made elsewhere
+```
+
+Mutating an entity method (e.g. `group.setName(...)`) performs the action
+and returns its own response — it does **not** silently update the
+entity's cached `.data`. Call `.refresh()` when you want that.
+
+Chat and Message have no "get by id" endpoint on the server, so they get
+a thin variant: a thin handle with bound methods and no cached data,
+built locally via `.from(...)` (no network call):
+
+```ts
+const chat = client.chat.from("5511999999999@s.whatsapp.net");
+await chat.archive();
+await chat.pin();
+
+const message = client.message.from({ chat: "5511999999999@s.whatsapp.net", id: "msg-1" });
+await message.react("👍");
+await message.markRead();
+```
+
+`sendMessage.*` methods return a `Message` entity built from the send
+result, so you can act on what you just sent immediately:
+
+```ts
+const sent = await client.sendMessage.text({ number: "5511999999999", text: "Hi!" });
+await sent.react("👍");
+console.log(sent.chat, sent.id, sent.data); // raw send result on .data
+```
+
+### Module reference (flat methods)
+
+Every module also exposes flat, direct-by-id methods for actions the
+entity pattern doesn't cover, or when you don't need to fetch first
+(e.g. `client.instance.delete(id)` without a prior `getInfo`).
 
 ### Call
 
@@ -71,17 +125,15 @@ await client.chat.historySyncRequest({ count: 50 });
 ```
 
 `unarchive`, `unpin`, and `unmute` are also available, all taking a chat
-JID string.
+JID string. Use `client.chat.from(jid)` for a bound handle instead (see
+Entities above).
 
 ### Community
 
 ```ts
-await client.community.create("My Community");
-await client.community.addParticipants({
-  communityJid: "123456789@newsletter",
-  groupJid: ["123456789-987654321@g.us"],
-});
-await client.community.removeParticipants({ communityJid: "...", groupJid: [...] });
+const { data: community } = await client.community.create("My Community");
+await community.addParticipants(["123456789-987654321@g.us"]);
+await community.removeParticipants(["123456789-987654321@g.us"]);
 ```
 
 ### Group
@@ -92,23 +144,18 @@ const { data: group } = await client.group.create({
   participants: ["5511999999999@s.whatsapp.net"],
 });
 
-await client.group.setName({ groupJid: "123@g.us", name: "New name" });
-await client.group.setDescription({ groupJid: "123@g.us", description: "..." });
-await client.group.setPhoto({ groupJid: "123@g.us", image: "<base64>" });
-await client.group.updateParticipants({
-  groupJid: "123@g.us",
-  participants: ["5511999999999@s.whatsapp.net"],
-  action: "promote", // "add" | "remove" | "promote" | "demote"
-});
-await client.group.updateSettings({ groupJid: "123@g.us", action: "locked" });
+await group.setName("New name");
+await group.setDescription("...");
+await group.setPhoto("<base64>");
+await group.updateParticipants(["5511999999999@s.whatsapp.net"], "promote"); // add | remove | promote | demote
+await group.updateSettings("locked");
+const { data: link } = await group.getInviteLink();
+await group.leave();
 
-const { data: info } = await client.group.getInfo("123@g.us");
-const { data: link } = await client.group.getInviteLink({ groupJid: "123@g.us" });
 const { data: groups } = await client.group.list();
 const { data: myGroups } = await client.group.myGroups();
 
 await client.group.join("<invite-code>");
-await client.group.leave("123@g.us");
 ```
 
 ### Instance
@@ -119,52 +166,48 @@ const { data: instance } = await client.instance.create({
   token: "some-secret-token",
 });
 
+await instance.setProxy({ host: "proxy.example.com", port: "8080" });
+await instance.deleteProxy();
+const settings = await instance.getAdvancedSettings();
+await instance.updateAdvancedSettings({ rejectCall: true });
+const logs = await instance.getLogs({ level: "error", limit: 50 });
+await instance.forceReconnect();
+await instance.delete();
+
+// connect/disconnect/reconnect/logout/getStatus/getQr/pair have no id
+// param on the server — they act on whichever instance your apiKey
+// authenticates as, so they stay flat methods on the module, not the
+// entity, to avoid implying a scope the server doesn't support:
 await client.instance.connect({ phone: "5511999999999" });
 await client.instance.pair({ phone: "5511999999999" });
-const { data } = await client.instance.getQr();
-
+const { data: qr } = await client.instance.getQr();
 const { data: status } = await client.instance.getStatus();
-const { data: all } = await client.instance.getAll();
-const { data: one } = await client.instance.getInfo(instance.id);
-
-await client.instance.setProxy(instance.id, { host: "proxy.example.com", port: "8080" });
-await client.instance.deleteProxy(instance.id);
-
-const settings = await client.instance.getAdvancedSettings(instance.id);
-await client.instance.updateAdvancedSettings(instance.id, { rejectCall: true });
-
-const logs = await client.instance.getLogs(instance.id, { level: "error", limit: 50 });
-
 await client.instance.disconnect();
 await client.instance.reconnect();
-await client.instance.forceReconnect(instance.id);
 await client.instance.logout();
-await client.instance.delete(instance.id);
+
+const { data: all } = await client.instance.getAll();
 ```
 
 ### Label
 
 ```ts
 const labels = await client.label.list();
-
-await client.label.edit({ labelId: "lbl-1", name: "Urgent", color: 2 });
-await client.label.addToChat({ jid: "5511999999999@s.whatsapp.net", labelId: "lbl-1" });
-await client.label.removeFromChat({ jid: "5511999999999@s.whatsapp.net", labelId: "lbl-1" });
-await client.label.addToMessage({ jid: "...", labelId: "lbl-1", messageId: "msg-1" });
-await client.label.removeFromMessage({ jid: "...", labelId: "lbl-1", messageId: "msg-1" });
+await labels[0].edit({ name: "Urgent", color: 2 });
+await labels[0].addToChat("5511999999999@s.whatsapp.net");
+await labels[0].addToMessage("5511999999999@s.whatsapp.net", "msg-1");
 ```
 
 ### Message
 
 ```ts
-await client.message.react({ number: "5511999999999", id: "msg-1", reaction: "👍" });
-await client.message.markRead({ number: "5511999999999", id: ["msg-1"] });
-await client.message.markPlayed({ number: "5511999999999", id: ["msg-1"] });
-await client.message.setPresence({ number: "5511999999999", state: "composing" });
-await client.message.edit({ chat: "...", messageId: "msg-1", message: "new text" });
-await client.message.delete({ chat: "...", messageId: "msg-1" });
+const message = client.message.from({ chat: "5511999999999@s.whatsapp.net", id: "msg-1" });
+await message.react("👍");
+await message.markRead();
+await message.edit("new text");
+await message.delete();
+const { data } = await message.getStatus();
 
-const { data } = await client.message.getStatus("msg-1");
 const { data: media } = await client.message.downloadMedia({ message: rawWebhookMessage });
 ```
 
@@ -172,10 +215,11 @@ const { data: media } = await client.message.downloadMedia({ message: rawWebhook
 
 There are dedicated methods for **text**, **media**, **sticker**, **location**,
 **contact**, **link**, **button**, **carousel**, **list**, **poll**, and
-**status** (text and media) messages.
+**status** (text and media) messages. Every one returns a `Message`
+entity (see Entities above).
 
 ```ts
-await client.sendMessage.text({
+const sent = await client.sendMessage.text({
   number: "5511999999999",
   text: "Hi!",
   delay: 1000,
@@ -229,14 +273,20 @@ object instead (`instance.getLogs`, `label.list`,
 types (e.g. `GetGroupInfoResponse`, `SendMessageResponse`) for the exact
 shape.
 
+whatsmeow's `types.JID` has no custom JSON marshaling, so it appears in
+some raw response payloads (`GroupInfo.JID`, etc.) as a `Jid` object
+(`{User, Server, Device, RawAgent, Integrator}`) rather than the usual
+`"user@server"` string. `jidToString`/`parseJid` (exported from the
+package root) convert between the two.
+
 ## Extending
 
 `EvolutionGoClient#request<T>(method, path, options?)` and
 `#requestForm<T>(method, path, form)` are the only two transport
-primitives — every module method is a thin, typed wrapper around one of
-them. To add an endpoint, add a method to the relevant module class (or a
-new module under `src/modules/`) rather than calling the transport
-directly from application code.
+primitives — every module method and entity method is a thin, typed
+wrapper around one of them. To add an endpoint, add a method to the
+relevant module or entity class (or a new module under `src/modules/`)
+rather than calling the transport directly from application code.
 
 ## API documentation
 

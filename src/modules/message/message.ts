@@ -13,12 +13,18 @@ import type {
   ReactResponse,
   SetPresenceBody,
 } from "./types";
+import { Message } from "./entity";
 
 export class MessageModule {
   readonly #request: RequestFn;
 
   constructor(request: RequestFn) {
     this.#request = request;
+  }
+
+  /** Builds a Message handle for a known chat + id — no network call. */
+  from(identity: { chat: string; id: string }) {
+    return new Message(identity, this.#request);
   }
 
   delete(body: DeleteMessageBody) {

@@ -1,8 +1,9 @@
 export type {
   ChatLabelBody,
   EditLabelBody,
-  Label,
   LabelActionResponse,
+  LabelData,
   MessageLabelBody,
 } from "./types";
+export { Label } from "./entity";
 export { LabelModule } from "./label";

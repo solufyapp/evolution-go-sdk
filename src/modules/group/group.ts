@@ -1,5 +1,5 @@
 import type { RequestFn } from "@/transport";
-import { parseJid } from "@/jid";
+import { jidToString, parseJid } from "@/jid";
 import type {
   CreateGroupBody,
   CreateGroupResponse,
@@ -15,6 +15,7 @@ import type {
   UpdateGroupSettingsBody,
   UpdateParticipantsBody,
 } from "./types";
+import { Group } from "./entity";
 
 export class GroupModule {
   readonly #request: RequestFn;
@@ -23,10 +24,27 @@ export class GroupModule {
     this.#request = request;
   }
 
-  create(body: CreateGroupBody) {
-    return this.#request<CreateGroupResponse>("POST", "/group/create", {
-      body,
-    });
+  /**
+   * The create endpoint only returns {jid, name, owner, added, failed} —
+   * not a full GroupInfo — so this makes one extra getInfo() call to seed
+   * a fully-populated Group entity. A one-time construction cost, not a
+   * recurring auto-refresh pattern.
+   */
+  async create(body: CreateGroupBody) {
+    const res = await this.#request<CreateGroupResponse>(
+      "POST",
+      "/group/create",
+      { body },
+    );
+    const info = await this.#request<GetGroupInfoResponse>(
+      "POST",
+      "/group/info",
+      { body: { groupJid: jidToString(res.data.jid) } },
+    );
+    return {
+      message: res.message,
+      data: new Group(info.data, this.#request),
+    };
   }
 
   setDescription(body: SetGroupDescriptionBody) {
@@ -35,10 +53,13 @@ export class GroupModule {
     });
   }
 
-  getInfo(groupJid: string) {
-    return this.#request<GetGroupInfoResponse>("POST", "/group/info", {
-      body: { groupJid },
-    });
+  async getInfo(groupJid: string) {
+    const res = await this.#request<GetGroupInfoResponse>(
+      "POST",
+      "/group/info",
+      { body: { groupJid } },
+    );
+    return { message: res.message, data: new Group(res.data, this.#request) };
   }
 
   getInviteLink(body: GetGroupInviteLinkBody) {
@@ -61,12 +82,20 @@ export class GroupModule {
     });
   }
 
-  list() {
-    return this.#request<ListGroupsResponse>("GET", "/group/list");
+  async list() {
+    const res = await this.#request<ListGroupsResponse>("GET", "/group/list");
+    return {
+      message: res.message,
+      data: res.data.map((d) => new Group(d, this.#request)),
+    };
   }
 
-  myGroups() {
-    return this.#request<ListGroupsResponse>("GET", "/group/myall");
+  async myGroups() {
+    const res = await this.#request<ListGroupsResponse>("GET", "/group/myall");
+    return {
+      message: res.message,
+      data: res.data.map((d) => new Group(d, this.#request)),
+    };
   }
 
   setName(body: SetGroupNameBody) {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseJid } from "./jid";
+import { jidToString, parseJid } from "./jid";
 
 describe("parseJid", () => {
   it("parses a plain user@server JID", () => {
@@ -41,5 +41,48 @@ describe("parseJid", () => {
       RawAgent: 0,
       Integrator: 0,
     });
+  });
+});
+
+describe("jidToString", () => {
+  it("formats a plain user@server Jid", () => {
+    expect(
+      jidToString({
+        User: "5511999999999",
+        Server: "s.whatsapp.net",
+        Device: 0,
+        RawAgent: 0,
+        Integrator: 0,
+      }),
+    ).toBe("5511999999999@s.whatsapp.net");
+  });
+
+  it("formats a Jid with a device id", () => {
+    expect(
+      jidToString({
+        User: "5511999999999",
+        Server: "s.whatsapp.net",
+        Device: 5,
+        RawAgent: 0,
+        Integrator: 0,
+      }),
+    ).toBe("5511999999999:5@s.whatsapp.net");
+  });
+
+  it("formats a Jid with a raw agent and device id", () => {
+    expect(
+      jidToString({
+        User: "5511999999999",
+        Server: "s.whatsapp.net",
+        Device: 5,
+        RawAgent: 3,
+        Integrator: 0,
+      }),
+    ).toBe("5511999999999.3:5@s.whatsapp.net");
+  });
+
+  it("round-trips with parseJid for group JIDs", () => {
+    const jid = "123456789-987654321@g.us";
+    expect(jidToString(parseJid(jid))).toBe(jid);
   });
 });

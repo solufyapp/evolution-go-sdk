@@ -18,7 +18,7 @@ export interface EditLabelBody {
   deleted?: boolean;
 }
 
-export interface Label {
+export interface LabelData {
   id: string;
   instance_id: string;
   label_id: string;

@@ -35,7 +35,7 @@ export interface GetLogsQuery {
   limit?: number;
 }
 
-export interface Instance {
+export interface InstanceData {
   id: string;
   name: string;
   token: string;
@@ -69,7 +69,7 @@ export interface LogEntry {
   metadata?: unknown;
 }
 
-export type GetAllInstancesResponse = SuccessResponse<Instance[]>;
+export type GetAllInstancesResponse = SuccessResponse<InstanceData[]>;
 
 export type ConnectResponse = SuccessResponse<{
   jid: string;
@@ -77,9 +77,9 @@ export type ConnectResponse = SuccessResponse<{
   eventString: string;
 }>;
 
-export type CreateInstanceResponse = SuccessResponse<Instance>;
+export type CreateInstanceResponse = SuccessResponse<InstanceData>;
 
-export type GetInstanceResponse = SuccessResponse<Instance>;
+export type GetInstanceResponse = SuccessResponse<InstanceData>;
 
 export type PairResponse = SuccessResponse<{ PairingCode: string }>;
 

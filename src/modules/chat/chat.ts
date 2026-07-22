@@ -4,12 +4,18 @@ import type {
   HistorySyncRequestBody,
   HistorySyncRequestResponse,
 } from "./types";
+import { Chat } from "./entity";
 
 export class ChatModule {
   readonly #request: RequestFn;
 
   constructor(request: RequestFn) {
     this.#request = request;
+  }
+
+  /** Builds a Chat handle for a known JID — no network call. */
+  from(jid: string) {
+    return new Chat(jid, this.#request);
   }
 
   archive(chat: string) {
