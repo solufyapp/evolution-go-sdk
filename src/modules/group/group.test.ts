@@ -163,7 +163,13 @@ describe("GroupModule", () => {
     });
     expect(r).toHaveBeenCalledWith("POST", "/group/participant", {
       body: {
-        groupJid: "g@g.us",
+        groupJid: {
+          User: "g",
+          Server: "g.us",
+          Device: 0,
+          RawAgent: 0,
+          Integrator: 0,
+        },
         participants: ["1@s.whatsapp.net"],
         action: "promote",
       },

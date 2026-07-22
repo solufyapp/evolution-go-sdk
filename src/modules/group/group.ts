@@ -96,7 +96,7 @@ export class GroupModule {
 
   async updateParticipants(body: UpdateParticipantsBody) {
     await this.#request<GroupActionResponse>("POST", "/group/participant", {
-      body,
+      body: { ...body, groupJid: parseJid(body.groupJid) },
     });
   }
 

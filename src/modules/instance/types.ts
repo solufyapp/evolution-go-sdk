@@ -95,6 +95,7 @@ export type GetQrResponse = SuccessResponse<{
   code: string;
   passkeyStage?: string;
   passkeyOpenUrl?: string;
+  passkeyCode?: string;
 }>;
 
 export type GetStatusResponse = SuccessResponse<{

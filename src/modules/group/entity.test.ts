@@ -105,7 +105,7 @@ describe("Group entity", () => {
     await group.updateParticipants(["1@s.whatsapp.net"], "promote");
     expect(request).toHaveBeenCalledWith("POST", "/group/participant", {
       body: {
-        groupJid: "123456789-987654321@g.us",
+        groupJid: jid,
         participants: ["1@s.whatsapp.net"],
         action: "promote",
       },

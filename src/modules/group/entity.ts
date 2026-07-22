@@ -58,7 +58,7 @@ export class Group {
 
   async updateParticipants(participants: string[], action: ParticipantChange) {
     await this.#request<GroupActionResponse>("POST", "/group/participant", {
-      body: { groupJid: this.jid, participants, action },
+      body: { groupJid: this.data.JID, participants, action },
     });
   }
 

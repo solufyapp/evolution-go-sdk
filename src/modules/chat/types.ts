@@ -1,4 +1,4 @@
-import type { SuccessResponse } from "@/shared";
+import type { Jid, SuccessResponse } from "@/shared";
 
 export interface HistorySyncRequestBody {
   count?: number;
@@ -7,7 +7,10 @@ export interface HistorySyncRequestBody {
 
 export type ChatActionResponse = SuccessResponse<{ timestamp: string }>;
 
-/** whatsmeow.SendResponse — no json tags, passed through as-is. */
-export type HistorySyncRequestResponse = SuccessResponse<
-  Record<string, unknown>
->;
+export type HistorySyncRequestResponse = SuccessResponse<{
+  Timestamp: string;
+  ID: string;
+  ServerID: number;
+  DebugTimings: Record<string, unknown>;
+  Sender: Jid;
+}>;
