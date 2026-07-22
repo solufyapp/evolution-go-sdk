@@ -1,6 +1,7 @@
 {
   "name": "@solufy/evolution-go-sdk",
   "version": "0.3.0",
+  "private": "false",
   "description": "Unofficial SDK for the Evolution GO Whatsapp API",
   "type": "module",
   "main": "./lib/index.cjs",
