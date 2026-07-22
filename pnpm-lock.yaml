@@ -213,9 +213,6 @@ importers:
       '@changesets/cli':
         specifier: ^2.31.1
         version: 2.31.1(@types/node@26.1.1)
-      '@rolldown/binding-darwin-arm64':
-        specifier: ^1.2.0
-        version: 1.2.0
       '@types/node':
         specifier: ^26.1.1
         version: 26.1.1
@@ -1842,7 +1839,8 @@ snapshots:
   '@rolldown/binding-darwin-arm64@1.1.5':
     optional: true
 
-  '@rolldown/binding-darwin-arm64@1.2.0': {}
+  '@rolldown/binding-darwin-arm64@1.2.0':
+    optional: true
 
   '@rolldown/binding-darwin-x64@1.1.5':
     optional: true

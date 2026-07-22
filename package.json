@@ -3,18 +3,18 @@
   "version": "0.1.0",
   "description": "Unofficial SDK for the Evolution GO Whatsapp API",
   "type": "module",
-  "main": "./lib/src.cjs",
-  "module": "./lib/src.mjs",
-  "types": "./lib/src.d.mts",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.mjs",
+  "types": "./lib/index.d.mts",
   "exports": {
     ".": {
       "import": {
-        "types": "./lib/src.d.mts",
-        "default": "./lib/src.mjs"
+        "types": "./lib/index.d.mts",
+        "default": "./lib/index.mjs"
       },
       "require": {
-        "types": "./lib/src.d.cts",
-        "default": "./lib/src.cjs"
+        "types": "./lib/index.d.cts",
+        "default": "./lib/index.cjs"
       }
     }
   },
@@ -24,7 +24,7 @@
   "scripts": {
     "release": "pnpm build && changeset publish",
     "check-types": "tsc --noEmit",
-    "build": "tsdown ./src",
+    "build": "tsdown",
     "lint": "biome check --write .",
     "lint:ci": "biome check .",
     "test": "vitest run"
@@ -32,7 +32,7 @@
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": ">=22",
+      "version": ">=22.18.0",
       "onFail": "warn"
     },
     "packageManager": {
@@ -47,7 +47,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",
     "@changesets/cli": "^2.31.1",
-    "@rolldown/binding-darwin-arm64": "^1.2.0",
     "@types/node": "^26.1.1",
     "tsdown": "^0.22.12",
     "typescript": "^7.0.2",
