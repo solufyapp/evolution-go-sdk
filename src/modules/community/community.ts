@@ -1,5 +1,9 @@
 import type { RequestFn } from "@/transport";
-import type { CommunityParticipantBody } from "./types";
+import type {
+  CommunityParticipantBody,
+  CommunityParticipantResponse,
+  CreateCommunityResponse,
+} from "./types";
 
 export class CommunityModule {
   readonly #request: RequestFn;
@@ -9,16 +13,24 @@ export class CommunityModule {
   }
 
   create(communityName: string) {
-    return this.#request("POST", "/community/create", {
+    return this.#request<CreateCommunityResponse>("POST", "/community/create", {
       body: { communityName },
     });
   }
 
   addParticipants(body: CommunityParticipantBody) {
-    return this.#request("POST", "/community/add", { body });
+    return this.#request<CommunityParticipantResponse>(
+      "POST",
+      "/community/add",
+      { body },
+    );
   }
 
   removeParticipants(body: CommunityParticipantBody) {
-    return this.#request("POST", "/community/remove", { body });
+    return this.#request<CommunityParticipantResponse>(
+      "POST",
+      "/community/remove",
+      { body },
+    );
   }
 }

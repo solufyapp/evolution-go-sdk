@@ -1,4 +1,11 @@
-import type { GroupSettingsAction, ParticipantChange } from "@/shared";
+import type {
+  GroupInfo,
+  GroupSettingsAction,
+  Jid,
+  ParticipantChange,
+  SuccessMessage,
+  SuccessResponse,
+} from "@/shared";
 
 export interface CreateGroupBody {
   groupName: string;
@@ -35,3 +42,21 @@ export interface UpdateGroupSettingsBody {
   groupJid: string;
   action: GroupSettingsAction;
 }
+
+export type CreateGroupResponse = SuccessResponse<{
+  jid: Jid;
+  name: string;
+  owner: Jid;
+  added: Jid[];
+  failed: Jid[];
+}>;
+
+export type GetGroupInfoResponse = SuccessResponse<GroupInfo>;
+
+export type GetGroupInviteLinkResponse = SuccessResponse<string>;
+
+export type ListGroupsResponse = SuccessResponse<GroupInfo[]>;
+
+export type SetGroupPhotoResponse = SuccessResponse<string>;
+
+export type GroupActionResponse = SuccessMessage;

@@ -17,6 +17,7 @@ export type {
   SendLocationBody,
   SendMediaBody,
   SendMessageBase,
+  SendMessageResponse,
   SendPollBody,
   SendStatusMediaBody,
   SendStatusTextBody,

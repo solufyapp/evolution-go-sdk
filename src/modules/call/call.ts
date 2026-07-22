@@ -1,4 +1,6 @@
+import type { SuccessMessage } from "@/shared";
 import type { RequestFn } from "@/transport";
+import { parseJid } from "@/jid";
 import type { RejectCallBody } from "./types";
 
 export class CallModule {
@@ -9,6 +11,11 @@ export class CallModule {
   }
 
   reject(body: RejectCallBody) {
-    return this.#request("POST", "/call/reject", { body });
+    return this.#request<SuccessMessage>("POST", "/call/reject", {
+      body: {
+        callCreator: body.callCreator ? parseJid(body.callCreator) : undefined,
+        callId: body.callId,
+      },
+    });
   }
 }

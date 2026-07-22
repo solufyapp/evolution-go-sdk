@@ -53,11 +53,19 @@ describe("GroupModule", () => {
     });
   });
 
-  it("leave", async () => {
+  it("leave sends groupJid serialized as a Jid object", async () => {
     const r = makeRequest();
-    await new GroupModule(r).leave("g@g.us");
+    await new GroupModule(r).leave("123456789-987654321@g.us");
     expect(r).toHaveBeenCalledWith("POST", "/group/leave", {
-      body: { groupJid: "g@g.us" },
+      body: {
+        groupJid: {
+          User: "123456789-987654321",
+          Server: "g.us",
+          Device: 0,
+          RawAgent: 0,
+          Integrator: 0,
+        },
+      },
     });
   });
 

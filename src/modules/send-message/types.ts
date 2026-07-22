@@ -1,4 +1,11 @@
-import type { QuotedStruct, VCardStruct } from "@/shared";
+import type {
+  MessageSendResult,
+  QuotedStruct,
+  SuccessResponse,
+  VCardStruct,
+} from "@/shared";
+
+export type SendMessageResponse = SuccessResponse<MessageSendResult>;
 
 export interface SendMessageBase {
   number: string;

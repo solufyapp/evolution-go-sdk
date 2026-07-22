@@ -7,6 +7,7 @@ import type {
   SendListBody,
   SendLocationBody,
   SendMediaBody,
+  SendMessageResponse,
   SendPollBody,
   SendStatusMediaBody,
   SendStatusTextBody,
@@ -24,47 +25,61 @@ export class SendMessageModule {
   }
 
   text(body: SendTextBody) {
-    return this.#request("POST", "/send/text", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/text", { body });
   }
 
   media(body: SendMediaBody) {
-    return this.#request("POST", "/send/media", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/media", {
+      body,
+    });
   }
 
   sticker(body: SendStickerBody) {
-    return this.#request("POST", "/send/sticker", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/sticker", {
+      body,
+    });
   }
 
   location(body: SendLocationBody) {
-    return this.#request("POST", "/send/location", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/location", {
+      body,
+    });
   }
 
   contact(body: SendContactBody) {
-    return this.#request("POST", "/send/contact", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/contact", {
+      body,
+    });
   }
 
   link(body: SendLinkBody) {
-    return this.#request("POST", "/send/link", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/link", { body });
   }
 
   button(body: SendButtonBody) {
-    return this.#request("POST", "/send/button", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/button", {
+      body,
+    });
   }
 
   carousel(body: SendCarouselBody) {
-    return this.#request("POST", "/send/carousel", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/carousel", {
+      body,
+    });
   }
 
   list(body: SendListBody) {
-    return this.#request("POST", "/send/list", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/list", { body });
   }
 
   poll(body: SendPollBody) {
-    return this.#request("POST", "/send/poll", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/poll", { body });
   }
 
   statusText(body: SendStatusTextBody) {
-    return this.#request("POST", "/send/status/text", { body });
+    return this.#request<SendMessageResponse>("POST", "/send/status/text", {
+      body,
+    });
   }
 
   statusMedia(body: SendStatusMediaBody) {
@@ -74,6 +89,10 @@ export class SendMessageModule {
     if (body.url !== undefined) form.set("url", body.url);
     if (body.caption !== undefined) form.set("caption", body.caption);
     if (body.id !== undefined) form.set("id", body.id);
-    return this.#requestForm("POST", "/send/status/media", form);
+    return this.#requestForm<SendMessageResponse>(
+      "POST",
+      "/send/status/media",
+      form,
+    );
   }
 }
