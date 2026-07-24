@@ -1,10 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { CallModule } from "@/modules/call";
+import { ChatModule } from "@/modules/chat";
+import { CommunityModule } from "@/modules/community";
+import { GroupModule } from "@/modules/group";
+import { LabelModule } from "@/modules/label";
+import { MessageModule } from "@/modules/message";
+import { SendMessageModule } from "@/modules/send-message";
 import type { InstanceData } from "./types";
 import { Instance } from "./entity";
 
-function makeRequest() {
-  return vi.fn().mockResolvedValue({});
+function makeFetch(body: unknown = { message: "success", data: {} }) {
+  return vi.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve(body),
+  });
 }
 
 const data: InstanceData = {
@@ -33,149 +44,172 @@ const data: InstanceData = {
   ignoreStatus: false,
 };
 
-describe("Instance entity", () => {
-  it("exposes id from the underlying data", () => {
-    const instance = new Instance(data, makeRequest());
+describe("Instance client", () => {
+  it("exposes id and data from construction", () => {
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch: makeFetch(),
+    });
     expect(instance.id).toBe("inst-1");
+    expect(instance.data).toBe(data);
   });
 
-  it("refresh() re-fetches and replaces data", async () => {
-    const request = vi.fn().mockResolvedValue({
-      message: "success",
-      data: { ...data, name: "renamed" },
+  it("wires up one submodule per messaging tag", () => {
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch: makeFetch(),
     });
-    const instance = new Instance(data, request);
-    await instance.refresh();
-    expect(request).toHaveBeenCalledWith("GET", "/instance/info/inst-1");
-    expect(instance.data.name).toBe("renamed");
+    expect(instance.call).toBeInstanceOf(CallModule);
+    expect(instance.chat).toBeInstanceOf(ChatModule);
+    expect(instance.community).toBeInstanceOf(CommunityModule);
+    expect(instance.group).toBeInstanceOf(GroupModule);
+    expect(instance.label).toBeInstanceOf(LabelModule);
+    expect(instance.message).toBeInstanceOf(MessageModule);
+    expect(instance.sendMessage).toBeInstanceOf(SendMessageModule);
   });
 
-  it("delete() targets this instance's id", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.delete();
-    expect(request).toHaveBeenCalledWith("DELETE", "/instance/delete/inst-1");
-  });
-
-  it("setProxy() targets this instance's id", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.setProxy({ host: "proxy.example.com", port: "8080" });
-    expect(request).toHaveBeenCalledWith("POST", "/instance/proxy/inst-1", {
-      body: { host: "proxy.example.com", port: "8080" },
+  it("authenticates every request with its own token, not an admin key", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
     });
-  });
-
-  it("deleteProxy() targets this instance's id", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.deleteProxy();
-    expect(request).toHaveBeenCalledWith("DELETE", "/instance/proxy/inst-1");
-  });
-
-  it("forceReconnect() targets this instance's id", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.forceReconnect();
-    expect(request).toHaveBeenCalledWith(
-      "POST",
-      "/instance/forcereconnect/inst-1",
-      {},
+    await instance.chat.archive("chat@s.whatsapp.net");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/chat/archive",
+      expect.objectContaining({
+        headers: expect.objectContaining({ apikey: "tok" }),
+      }),
     );
   });
 
-  it("getLogs() targets this instance's id", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.getLogs({ limit: 10 });
-    expect(request).toHaveBeenCalledWith("GET", "/instance/logs/inst-1", {
-      query: { limit: 10 },
+  it("connect() -> POST /instance/connect", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
     });
-  });
-
-  it("getAdvancedSettings() targets this instance's id", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.getAdvancedSettings();
-    expect(request).toHaveBeenCalledWith(
-      "GET",
-      "/instance/inst-1/advanced-settings",
-    );
-  });
-
-  it("updateAdvancedSettings() targets this instance's id", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.updateAdvancedSettings({ rejectCall: true });
-    expect(request).toHaveBeenCalledWith(
-      "PUT",
-      "/instance/inst-1/advanced-settings",
-      { body: { rejectCall: true } },
-    );
-  });
-
-  it("connect() authenticates with this instance's own token", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
     await instance.connect({ phone: "5511999999999" });
-    expect(request).toHaveBeenCalledWith("POST", "/instance/connect", {
-      body: { phone: "5511999999999" },
-      apiKey: "tok",
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/connect",
+      expect.objectContaining({
+        body: JSON.stringify({ phone: "5511999999999" }),
+        headers: expect.objectContaining({ apikey: "tok" }),
+      }),
+    );
   });
 
-  it("disconnect() authenticates with this instance's own token", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
+  it("disconnect() -> POST /instance/disconnect", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
+    });
     await instance.disconnect();
-    expect(request).toHaveBeenCalledWith("POST", "/instance/disconnect", {
-      apiKey: "tok",
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/disconnect",
+      expect.objectContaining({
+        headers: expect.objectContaining({ apikey: "tok" }),
+      }),
+    );
   });
 
-  it("reconnect() authenticates with this instance's own token", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
+  it("reconnect() -> POST /instance/reconnect", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
+    });
     await instance.reconnect();
-    expect(request).toHaveBeenCalledWith("POST", "/instance/reconnect", {
-      apiKey: "tok",
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/reconnect",
+      expect.anything(),
+    );
   });
 
-  it("logout() authenticates with this instance's own token", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
+  it("logout() -> DELETE /instance/logout", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
+    });
     await instance.logout();
-    expect(request).toHaveBeenCalledWith("DELETE", "/instance/logout", {
-      apiKey: "tok",
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/logout",
+      expect.objectContaining({ method: "DELETE" }),
+    );
   });
 
-  it("getStatus() authenticates with this instance's own token", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
+  it("getStatus() -> GET /instance/status", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
+    });
     await instance.getStatus();
-    expect(request).toHaveBeenCalledWith("GET", "/instance/status", {
-      apiKey: "tok",
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/status",
+      expect.anything(),
+    );
   });
 
-  it("getQr() authenticates with this instance's own token", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
+  it("getQr() -> GET /instance/qr", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
+    });
     await instance.getQr();
-    expect(request).toHaveBeenCalledWith("GET", "/instance/qr", {
-      apiKey: "tok",
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/qr",
+      expect.anything(),
+    );
   });
 
-  it("pair() authenticates with this instance's own token", async () => {
-    const request = makeRequest();
-    const instance = new Instance(data, request);
-    await instance.pair({ phone: "5511999999999" });
-    expect(request).toHaveBeenCalledWith("POST", "/instance/pair", {
-      body: { phone: "5511999999999" },
-      apiKey: "tok",
+  it("pair() -> POST /instance/pair", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
     });
+    await instance.pair({ phone: "5511999999999" });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/pair",
+      expect.objectContaining({
+        body: JSON.stringify({ phone: "5511999999999" }),
+      }),
+    );
+  });
+
+  it("getAdvancedSettings() targets this instance's own id", async () => {
+    const fetch = makeFetch();
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
+    });
+    await instance.getAdvancedSettings();
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/inst-1/advanced-settings",
+      expect.anything(),
+    );
+  });
+
+  it("updateAdvancedSettings() targets this instance's own id", async () => {
+    const fetch = makeFetch({ message: "ok", settings: { rejectCall: true } });
+    const instance = new Instance(data, {
+      baseUrl: "https://api.example.com",
+      fetch,
+    });
+    const settings = await instance.updateAdvancedSettings({
+      rejectCall: true,
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/inst-1/advanced-settings",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ rejectCall: true }),
+      }),
+    );
+    expect(settings).toEqual({ rejectCall: true });
   });
 });

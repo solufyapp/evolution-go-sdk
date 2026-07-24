@@ -1,124 +1,21 @@
-import type { Instance } from "./modules/instance";
-import type { RequestOptions } from "./transport";
-import { EvolutionGoApiError } from "./errors";
-import { CallModule } from "./modules/call";
-import { ChatModule } from "./modules/chat";
-import { CommunityModule } from "./modules/community";
-import { GroupModule } from "./modules/group";
+import { type APIConfig, APITransport } from "./api";
 import { InstanceModule } from "./modules/instance";
-import { LabelModule } from "./modules/label";
-import { MessageModule } from "./modules/message";
-import { SendMessageModule } from "./modules/send-message";
 
-export interface EvolutionGoClientConfig {
-  baseUrl: string;
-  apiKey: string;
-  fetch?: typeof globalThis.fetch;
-}
-
+/**
+ * Admin-scoped client, authenticated with the server's global apikey.
+ * Only instance lifecycle management (create/list/info/delete/proxy/
+ * forcereconnect/logs) is reachable with this key — every other endpoint
+ * (chat, group, message, sendMessage, label, community, call, and the
+ * instance session operations like connect/getQr) requires a specific
+ * instance's own token instead, and is only reachable through the
+ * `Instance` client returned by `instance.create()`/`getInfo()`/`getAll()`.
+ */
 export class EvolutionGoClient {
-  readonly call: CallModule;
-  readonly chat: ChatModule;
-  readonly community: CommunityModule;
-  readonly group: GroupModule;
+  readonly transport: APITransport;
   readonly instance: InstanceModule;
-  readonly label: LabelModule;
-  readonly message: MessageModule;
-  readonly sendMessage: SendMessageModule;
 
-  readonly #baseUrl: string;
-  readonly #apiKey: string;
-  readonly #fetch: typeof globalThis.fetch;
-
-  constructor(config: EvolutionGoClientConfig) {
-    this.#baseUrl = config.baseUrl.replace(/\/$/, "");
-    this.#apiKey = config.apiKey;
-    this.#fetch = config.fetch ?? globalThis.fetch;
-
-    this.call = new CallModule(this.request.bind(this));
-    this.chat = new ChatModule(this.request.bind(this));
-    this.community = new CommunityModule(this.request.bind(this));
-    this.group = new GroupModule(this.request.bind(this));
-    this.instance = new InstanceModule(this.request.bind(this));
-    this.label = new LabelModule(this.request.bind(this));
-    this.message = new MessageModule(this.request.bind(this));
-    this.sendMessage = new SendMessageModule(
-      this.request.bind(this),
-      this.requestForm.bind(this),
-    );
-  }
-
-  /**
-   * Every module besides Instance's own id-scoped operations is scoped
-   * implicitly by whichever apikey the request authenticates with — there's
-   * no instanceId param on chat/group/message/send/etc. So "a client for
-   * this instance" is just a new client using that instance's token.
-   * Accepts either the token string directly or an Instance entity
-   * (its .data.token is used).
-   */
-  forInstance(tokenOrInstance: string | Instance): EvolutionGoClient {
-    const apiKey =
-      typeof tokenOrInstance === "string"
-        ? tokenOrInstance
-        : tokenOrInstance.data.token;
-    return new EvolutionGoClient({
-      baseUrl: this.#baseUrl,
-      apiKey,
-      fetch: this.#fetch,
-    });
-  }
-
-  async request<T>(
-    method: string,
-    path: string,
-    options: RequestOptions = {},
-  ): Promise<T> {
-    const url = new URL(this.#baseUrl + path);
-    if (options.query) {
-      for (const [k, v] of Object.entries(options.query)) {
-        if (v !== undefined) {
-          url.searchParams.set(k, String(v));
-        }
-      }
-    }
-
-    const res = await this.#fetch(url.toString(), {
-      method,
-      headers: {
-        apikey: options.apiKey ?? this.#apiKey,
-        ...(options.body !== undefined
-          ? { "Content-Type": "application/json" }
-          : {}),
-      },
-      ...(options.body !== undefined
-        ? { body: JSON.stringify(options.body) }
-        : {}),
-    });
-
-    const json = await res.json().catch(() => null);
-    if (!res.ok) {
-      throw new EvolutionGoApiError(res.status, json);
-    }
-    return json as T;
-  }
-
-  async requestForm<T>(
-    method: string,
-    path: string,
-    form: FormData,
-    apiKey?: string,
-  ): Promise<T> {
-    const url = this.#baseUrl + path;
-    const res = await this.#fetch(url, {
-      method,
-      headers: { apikey: apiKey ?? this.#apiKey },
-      body: form,
-    });
-
-    const json = await res.json().catch(() => null);
-    if (!res.ok) {
-      throw new EvolutionGoApiError(res.status, json);
-    }
-    return json as T;
+  constructor(config: APIConfig) {
+    this.transport = new APITransport(config);
+    this.instance = new InstanceModule(this.transport);
   }
 }

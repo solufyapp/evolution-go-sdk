@@ -1,11 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { GroupInfo } from "@/shared";
+import { makeApi } from "@/test-utils";
 import { Community } from "./entity";
-
-function makeRequest() {
-  return vi.fn().mockResolvedValue({});
-}
 
 const jid = {
   User: "123456789",
@@ -22,24 +19,24 @@ const data = {
 
 describe("Community entity", () => {
   it("exposes jid formatted from the underlying JID object", () => {
-    const community = new Community(data, makeRequest());
+    const community = new Community(data, makeApi());
     expect(community.jid).toBe("123456789@newsletter");
   });
 
   it("addParticipants() targets this community's jid", async () => {
-    const request = makeRequest();
-    const community = new Community(data, request);
+    const api = makeApi();
+    const community = new Community(data, api);
     await community.addParticipants(["g1@g.us"]);
-    expect(request).toHaveBeenCalledWith("POST", "/community/add", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/community/add", {
       body: { communityJid: "123456789@newsletter", groupJid: ["g1@g.us"] },
     });
   });
 
   it("removeParticipants() targets this community's jid", async () => {
-    const request = makeRequest();
-    const community = new Community(data, request);
+    const api = makeApi();
+    const community = new Community(data, api);
     await community.removeParticipants(["g1@g.us"]);
-    expect(request).toHaveBeenCalledWith("POST", "/community/remove", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/community/remove", {
       body: { communityJid: "123456789@newsletter", groupJid: ["g1@g.us"] },
     });
   });

@@ -1,17 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
+import { makeApi } from "@/test-utils";
 import { CallModule } from "./call";
-
-function makeRequest() {
-  return vi.fn().mockResolvedValue({});
-}
 
 describe("CallModule", () => {
   it("reject sends POST /call/reject with the JID serialized as a Jid object", async () => {
-    const request = makeRequest();
-    const m = new CallModule(request);
+    const api = makeApi();
+    const m = new CallModule(api);
     await m.reject({ callId: "abc123", callCreator: "1234@s.whatsapp.net" });
-    expect(request).toHaveBeenCalledWith("POST", "/call/reject", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/call/reject", {
       body: {
         callId: "abc123",
         callCreator: {
@@ -26,10 +23,10 @@ describe("CallModule", () => {
   });
 
   it("reject omits callCreator when not provided", async () => {
-    const request = makeRequest();
-    const m = new CallModule(request);
+    const api = makeApi();
+    const m = new CallModule(api);
     await m.reject({ callId: "abc123" });
-    expect(request).toHaveBeenCalledWith("POST", "/call/reject", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/call/reject", {
       body: { callId: "abc123", callCreator: undefined },
     });
   });

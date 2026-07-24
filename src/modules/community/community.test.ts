@@ -1,12 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { GroupInfo } from "@/shared";
+import { makeApi } from "@/test-utils";
 import { CommunityModule } from "./community";
 import { Community } from "./entity";
-
-function makeRequest() {
-  return vi.fn().mockResolvedValue({});
-}
 
 describe("CommunityModule", () => {
   it("create returns a Community entity", async () => {
@@ -19,9 +16,10 @@ describe("CommunityModule", () => {
         Integrator: 0,
       },
     } as GroupInfo;
-    const r = vi.fn().mockResolvedValue({ message: "success", data });
-    const community = await new CommunityModule(r).create("My Community");
-    expect(r).toHaveBeenCalledWith("POST", "/community/create", {
+    const api = makeApi();
+    vi.mocked(api.json).mockResolvedValue({ message: "success", data });
+    const community = await new CommunityModule(api).create("My Community");
+    expect(api.json).toHaveBeenCalledWith("POST", "/community/create", {
       body: { communityName: "My Community" },
     });
     expect(community).toBeInstanceOf(Community);
@@ -29,16 +27,18 @@ describe("CommunityModule", () => {
   });
 
   it("addParticipants", async () => {
-    const r = makeRequest();
+    const api = makeApi();
     const body = { communityJid: "123@newsletter", groupJid: ["g1@g.us"] };
-    await new CommunityModule(r).addParticipants(body);
-    expect(r).toHaveBeenCalledWith("POST", "/community/add", { body });
+    await new CommunityModule(api).addParticipants(body);
+    expect(api.json).toHaveBeenCalledWith("POST", "/community/add", { body });
   });
 
   it("removeParticipants", async () => {
-    const r = makeRequest();
+    const api = makeApi();
     const body = { communityJid: "123@newsletter", groupJid: ["g1@g.us"] };
-    await new CommunityModule(r).removeParticipants(body);
-    expect(r).toHaveBeenCalledWith("POST", "/community/remove", { body });
+    await new CommunityModule(api).removeParticipants(body);
+    expect(api.json).toHaveBeenCalledWith("POST", "/community/remove", {
+      body,
+    });
   });
 });

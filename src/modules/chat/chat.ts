@@ -1,4 +1,4 @@
-import type { RequestFn } from "@/transport";
+import type { APITransport } from "@/api";
 import type {
   ChatActionResponse,
   HistorySyncRequestBody,
@@ -7,19 +7,15 @@ import type {
 import { Chat } from "./entity";
 
 export class ChatModule {
-  readonly #request: RequestFn;
-
-  constructor(request: RequestFn) {
-    this.#request = request;
-  }
+  constructor(private readonly api: APITransport) {}
 
   /** Builds a Chat handle for a known JID — no network call. */
   from(jid: string) {
-    return new Chat(jid, this.#request);
+    return new Chat(jid, this.api);
   }
 
   async archive(chat: string) {
-    const res = await this.#request<ChatActionResponse>(
+    const res = await this.api.json<ChatActionResponse>(
       "POST",
       "/chat/archive",
       { body: { chat } },
@@ -28,7 +24,7 @@ export class ChatModule {
   }
 
   async unarchive(chat: string) {
-    const res = await this.#request<ChatActionResponse>(
+    const res = await this.api.json<ChatActionResponse>(
       "POST",
       "/chat/unarchive",
       { body: { chat } },
@@ -37,14 +33,14 @@ export class ChatModule {
   }
 
   async mute(chat: string) {
-    const res = await this.#request<ChatActionResponse>("POST", "/chat/mute", {
+    const res = await this.api.json<ChatActionResponse>("POST", "/chat/mute", {
       body: { chat },
     });
     return res.data;
   }
 
   async unmute(chat: string) {
-    const res = await this.#request<ChatActionResponse>(
+    const res = await this.api.json<ChatActionResponse>(
       "POST",
       "/chat/unmute",
       { body: { chat } },
@@ -53,21 +49,21 @@ export class ChatModule {
   }
 
   async pin(chat: string) {
-    const res = await this.#request<ChatActionResponse>("POST", "/chat/pin", {
+    const res = await this.api.json<ChatActionResponse>("POST", "/chat/pin", {
       body: { chat },
     });
     return res.data;
   }
 
   async unpin(chat: string) {
-    const res = await this.#request<ChatActionResponse>("POST", "/chat/unpin", {
+    const res = await this.api.json<ChatActionResponse>("POST", "/chat/unpin", {
       body: { chat },
     });
     return res.data;
   }
 
   async historySyncRequest(body: HistorySyncRequestBody) {
-    const res = await this.#request<HistorySyncRequestResponse>(
+    const res = await this.api.json<HistorySyncRequestResponse>(
       "POST",
       "/chat/history-sync",
       { body },

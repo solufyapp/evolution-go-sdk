@@ -1,5 +1,5 @@
+import type { APITransport } from "@/api";
 import type { Jid, MessageSendResult } from "@/shared";
-import type { RequestFn, RequestFormFn } from "@/transport";
 import { jidToString } from "@/jid";
 import { Message } from "@/modules/message/entity";
 import type {
@@ -19,13 +19,7 @@ import type {
 } from "./types";
 
 export class SendMessageModule {
-  readonly #request: RequestFn;
-  readonly #requestForm: RequestFormFn;
-
-  constructor(request: RequestFn, requestForm: RequestFormFn) {
-    this.#request = request;
-    this.#requestForm = requestForm;
-  }
+  constructor(private readonly api: APITransport) {}
 
   /**
    * Info has no json tags upstream (see MessageSendResult), so its
@@ -34,21 +28,22 @@ export class SendMessageModule {
   #toMessage(result: MessageSendResult) {
     const info = result.Info as { Chat?: Jid; ID?: string };
     return new Message(
-      { chat: info.Chat ? jidToString(info.Chat) : "", id: info.ID ?? "" },
-      this.#request,
+      info.ID ?? "",
+      info.Chat ? jidToString(info.Chat) : "",
+      this.api,
       result,
     );
   }
 
   async text(body: SendTextBody) {
-    const res = await this.#request<SendMessageResponse>("POST", "/send/text", {
+    const res = await this.api.json<SendMessageResponse>("POST", "/send/text", {
       body,
     });
     return this.#toMessage(res.data);
   }
 
   async media(body: SendMediaBody) {
-    const res = await this.#request<SendMessageResponse>(
+    const res = await this.api.json<SendMessageResponse>(
       "POST",
       "/send/media",
       { body },
@@ -57,7 +52,7 @@ export class SendMessageModule {
   }
 
   async sticker(body: SendStickerBody) {
-    const res = await this.#request<SendMessageResponse>(
+    const res = await this.api.json<SendMessageResponse>(
       "POST",
       "/send/sticker",
       { body },
@@ -66,7 +61,7 @@ export class SendMessageModule {
   }
 
   async location(body: SendLocationBody) {
-    const res = await this.#request<SendMessageResponse>(
+    const res = await this.api.json<SendMessageResponse>(
       "POST",
       "/send/location",
       { body },
@@ -75,7 +70,7 @@ export class SendMessageModule {
   }
 
   async contact(body: SendContactBody) {
-    const res = await this.#request<SendMessageResponse>(
+    const res = await this.api.json<SendMessageResponse>(
       "POST",
       "/send/contact",
       { body },
@@ -84,14 +79,14 @@ export class SendMessageModule {
   }
 
   async link(body: SendLinkBody) {
-    const res = await this.#request<SendMessageResponse>("POST", "/send/link", {
+    const res = await this.api.json<SendMessageResponse>("POST", "/send/link", {
       body,
     });
     return this.#toMessage(res.data);
   }
 
   async button(body: SendButtonBody) {
-    const res = await this.#request<SendMessageResponse>(
+    const res = await this.api.json<SendMessageResponse>(
       "POST",
       "/send/button",
       { body },
@@ -100,7 +95,7 @@ export class SendMessageModule {
   }
 
   async carousel(body: SendCarouselBody) {
-    const res = await this.#request<SendMessageResponse>(
+    const res = await this.api.json<SendMessageResponse>(
       "POST",
       "/send/carousel",
       { body },
@@ -109,21 +104,21 @@ export class SendMessageModule {
   }
 
   async list(body: SendListBody) {
-    const res = await this.#request<SendMessageResponse>("POST", "/send/list", {
+    const res = await this.api.json<SendMessageResponse>("POST", "/send/list", {
       body,
     });
     return this.#toMessage(res.data);
   }
 
   async poll(body: SendPollBody) {
-    const res = await this.#request<SendMessageResponse>("POST", "/send/poll", {
+    const res = await this.api.json<SendMessageResponse>("POST", "/send/poll", {
       body,
     });
     return this.#toMessage(res.data);
   }
 
   async statusText(body: SendStatusTextBody) {
-    const res = await this.#request<SendMessageResponse>(
+    const res = await this.api.json<SendMessageResponse>(
       "POST",
       "/send/status/text",
       { body },
@@ -138,7 +133,7 @@ export class SendMessageModule {
     if (body.url !== undefined) form.set("url", body.url);
     if (body.caption !== undefined) form.set("caption", body.caption);
     if (body.id !== undefined) form.set("id", body.id);
-    const res = await this.#requestForm<SendMessageResponse>(
+    const res = await this.api.formData<SendMessageResponse>(
       "POST",
       "/send/status/media",
       form,

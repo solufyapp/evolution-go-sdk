@@ -1,4 +1,4 @@
-import type { RequestFn } from "@/transport";
+import type { APITransport } from "@/api";
 import type {
   CommunityParticipantBody,
   CommunityParticipantResponse,
@@ -7,23 +7,19 @@ import type {
 import { Community } from "./entity";
 
 export class CommunityModule {
-  readonly #request: RequestFn;
-
-  constructor(request: RequestFn) {
-    this.#request = request;
-  }
+  constructor(private readonly api: APITransport) {}
 
   async create(communityName: string) {
-    const res = await this.#request<CreateCommunityResponse>(
+    const res = await this.api.json<CreateCommunityResponse>(
       "POST",
       "/community/create",
       { body: { communityName } },
     );
-    return new Community(res.data, this.#request);
+    return new Community(res.data, this.api);
   }
 
   async addParticipants(body: CommunityParticipantBody) {
-    const res = await this.#request<CommunityParticipantResponse>(
+    const res = await this.api.json<CommunityParticipantResponse>(
       "POST",
       "/community/add",
       { body },
@@ -32,7 +28,7 @@ export class CommunityModule {
   }
 
   async removeParticipants(body: CommunityParticipantBody) {
-    const res = await this.#request<CommunityParticipantResponse>(
+    const res = await this.api.json<CommunityParticipantResponse>(
       "POST",
       "/community/remove",
       { body },

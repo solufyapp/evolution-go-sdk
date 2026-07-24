@@ -1,11 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { APITransport } from "@/api";
 import type { InstanceData } from "./types";
 import { Instance } from "./entity";
 import { InstanceModule } from "./instance";
 
-function makeRequest() {
-  return vi.fn().mockResolvedValue({});
+function makeFetch(status: number, body: unknown) {
+  return vi.fn().mockResolvedValue({
+    ok: status >= 200 && status < 300,
+    status,
+    json: () => Promise.resolve(body),
+  });
+}
+
+function makeApi(fetch: ReturnType<typeof makeFetch>) {
+  return new APITransport({
+    baseUrl: "https://api.example.com",
+    apiKey: "admin-key",
+    fetch,
+  });
 }
 
 const instanceData: InstanceData = {
@@ -35,148 +48,101 @@ const instanceData: InstanceData = {
 };
 
 describe("InstanceModule", () => {
-  it("getAll -> GET /instance/all, wraps each item in an Instance entity", async () => {
-    const r = vi
-      .fn()
-      .mockResolvedValue({ message: "success", data: [instanceData] });
-    const result = await new InstanceModule(r).getAll();
-    expect(r).toHaveBeenCalledWith("GET", "/instance/all");
+  it("getAll -> GET /instance/all, wraps each item in an Instance client", async () => {
+    const fetch = makeFetch(200, { message: "success", data: [instanceData] });
+    const result = await new InstanceModule(makeApi(fetch)).getAll();
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/all",
+      expect.anything(),
+    );
     expect(result[0]).toBeInstanceOf(Instance);
     expect(result[0]?.id).toBe("inst-123");
   });
 
-  it("connect -> POST /instance/connect", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).connect({ phone: "5511999999999" });
-    expect(r).toHaveBeenCalledWith("POST", "/instance/connect", {
-      body: { phone: "5511999999999" },
+  it("create -> POST /instance/create, returns an Instance client", async () => {
+    const fetch = makeFetch(200, { message: "success", data: instanceData });
+    const result = await new InstanceModule(makeApi(fetch)).create({
+      name: "my-instance",
     });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/create",
+      expect.objectContaining({
+        body: JSON.stringify({ name: "my-instance" }),
+      }),
+    );
+    expect(result).toBeInstanceOf(Instance);
+    expect(result.id).toBe("inst-123");
   });
 
-  it("create -> POST /instance/create, returns an Instance entity", async () => {
-    const r = vi
-      .fn()
-      .mockResolvedValue({ message: "success", data: instanceData });
-    const result = await new InstanceModule(r).create({ name: "my-instance" });
-    expect(r).toHaveBeenCalledWith("POST", "/instance/create", {
-      body: { name: "my-instance" },
-    });
+  it("getInfo -> GET /instance/info/{id}, returns an Instance client", async () => {
+    const fetch = makeFetch(200, { message: "success", data: instanceData });
+    const result = await new InstanceModule(makeApi(fetch)).getInfo("inst-123");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/info/inst-123",
+      expect.anything(),
+    );
     expect(result).toBeInstanceOf(Instance);
     expect(result.id).toBe("inst-123");
   });
 
   it("delete -> DELETE /instance/delete/{id}", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).delete("inst-123");
-    expect(r).toHaveBeenCalledWith("DELETE", "/instance/delete/inst-123");
-  });
-
-  it("disconnect -> POST /instance/disconnect", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).disconnect();
-    expect(r).toHaveBeenCalledWith("POST", "/instance/disconnect");
-  });
-
-  it("forceReconnect -> POST /instance/forcereconnect/{id}", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).forceReconnect("inst-123");
-    expect(r).toHaveBeenCalledWith(
-      "POST",
-      "/instance/forcereconnect/inst-123",
-      {},
+    const fetch = makeFetch(200, {});
+    await new InstanceModule(makeApi(fetch)).delete("inst-123");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/delete/inst-123",
+      expect.objectContaining({ method: "DELETE" }),
     );
-  });
-
-  it("getInfo -> GET /instance/info/{id}, returns an Instance entity", async () => {
-    const r = vi
-      .fn()
-      .mockResolvedValue({ message: "success", data: instanceData });
-    const result = await new InstanceModule(r).getInfo("inst-123");
-    expect(r).toHaveBeenCalledWith("GET", "/instance/info/inst-123");
-    expect(result).toBeInstanceOf(Instance);
-    expect(result.id).toBe("inst-123");
-  });
-
-  it("logout -> DELETE /instance/logout", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).logout();
-    expect(r).toHaveBeenCalledWith("DELETE", "/instance/logout");
-  });
-
-  it("getLogs passes query params", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).getLogs("inst-123", {
-      level: "error",
-      limit: 50,
-    });
-    expect(r).toHaveBeenCalledWith("GET", "/instance/logs/inst-123", {
-      query: { level: "error", limit: 50 },
-    });
-  });
-
-  it("pair -> POST /instance/pair", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).pair({ phone: "5511999999999" });
-    expect(r).toHaveBeenCalledWith("POST", "/instance/pair", {
-      body: { phone: "5511999999999" },
-    });
   });
 
   it("setProxy -> POST /instance/proxy/{id}", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).setProxy("inst-123", {
+    const fetch = makeFetch(200, {
+      message: "success",
+      data: {
+        protocol: "http",
+        host: "proxy.example.com",
+        port: "8080",
+        hasAuth: false,
+      },
+    });
+    await new InstanceModule(makeApi(fetch)).setProxy("inst-123", {
       host: "proxy.example.com",
       port: "8080",
     });
-    expect(r).toHaveBeenCalledWith("POST", "/instance/proxy/inst-123", {
-      body: { host: "proxy.example.com", port: "8080" },
-    });
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/proxy/inst-123",
+      expect.objectContaining({
+        body: JSON.stringify({ host: "proxy.example.com", port: "8080" }),
+      }),
+    );
   });
 
   it("deleteProxy -> DELETE /instance/proxy/{id}", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).deleteProxy("inst-123");
-    expect(r).toHaveBeenCalledWith("DELETE", "/instance/proxy/inst-123");
-  });
-
-  it("getQr -> GET /instance/qr", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).getQr();
-    expect(r).toHaveBeenCalledWith("GET", "/instance/qr");
-  });
-
-  it("reconnect -> POST /instance/reconnect", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).reconnect();
-    expect(r).toHaveBeenCalledWith("POST", "/instance/reconnect");
-  });
-
-  it("getStatus -> GET /instance/status", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).getStatus();
-    expect(r).toHaveBeenCalledWith("GET", "/instance/status");
-  });
-
-  it("getAdvancedSettings -> GET /instance/{id}/advanced-settings", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).getAdvancedSettings("inst-123");
-    expect(r).toHaveBeenCalledWith(
-      "GET",
-      "/instance/inst-123/advanced-settings",
+    const fetch = makeFetch(200, {});
+    await new InstanceModule(makeApi(fetch)).deleteProxy("inst-123");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/proxy/inst-123",
+      expect.objectContaining({ method: "DELETE" }),
     );
   });
 
-  it("updateAdvancedSettings -> PUT /instance/{id}/advanced-settings", async () => {
-    const r = makeRequest();
-    await new InstanceModule(r).updateAdvancedSettings("inst-123", {
-      rejectCall: true,
+  it("forceReconnect -> POST /instance/forcereconnect/{id}", async () => {
+    const fetch = makeFetch(200, {});
+    await new InstanceModule(makeApi(fetch)).forceReconnect("inst-123");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.com/instance/forcereconnect/inst-123",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("getLogs passes query params", async () => {
+    const fetch = makeFetch(200, []);
+    await new InstanceModule(makeApi(fetch)).getLogs("inst-123", {
+      level: "error",
+      limit: 50,
     });
-    expect(r).toHaveBeenCalledWith(
-      "PUT",
-      "/instance/inst-123/advanced-settings",
-      {
-        body: { rejectCall: true },
-      },
-    );
+    const url = vi.mocked(fetch).mock.calls[0][0] as string;
+    expect(url).toContain("/instance/logs/inst-123");
+    expect(url).toContain("level=error");
+    expect(url).toContain("limit=50");
   });
 });

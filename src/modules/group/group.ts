@@ -1,4 +1,4 @@
-import type { RequestFn } from "@/transport";
+import type { APITransport } from "@/api";
 import { jidToString, parseJid } from "@/jid";
 import type {
   CreateGroupBody,
@@ -18,11 +18,7 @@ import type {
 import { Group } from "./entity";
 
 export class GroupModule {
-  readonly #request: RequestFn;
-
-  constructor(request: RequestFn) {
-    this.#request = request;
-  }
+  constructor(private readonly api: APITransport) {}
 
   /**
    * The create endpoint only returns {jid, name, owner, added, failed} —
@@ -31,36 +27,36 @@ export class GroupModule {
    * recurring auto-refresh pattern.
    */
   async create(body: CreateGroupBody) {
-    const created = await this.#request<CreateGroupResponse>(
+    const created = await this.api.json<CreateGroupResponse>(
       "POST",
       "/group/create",
       { body },
     );
-    const info = await this.#request<GetGroupInfoResponse>(
+    const info = await this.api.json<GetGroupInfoResponse>(
       "POST",
       "/group/info",
       { body: { groupJid: jidToString(created.data.jid) } },
     );
-    return new Group(info.data, this.#request);
+    return new Group(info.data, this.api);
   }
 
   async setDescription(body: SetGroupDescriptionBody) {
-    await this.#request<GroupActionResponse>("POST", "/group/description", {
+    await this.api.json<GroupActionResponse>("POST", "/group/description", {
       body,
     });
   }
 
   async getInfo(groupJid: string) {
-    const res = await this.#request<GetGroupInfoResponse>(
+    const res = await this.api.json<GetGroupInfoResponse>(
       "POST",
       "/group/info",
       { body: { groupJid } },
     );
-    return new Group(res.data, this.#request);
+    return new Group(res.data, this.api);
   }
 
   async getInviteLink(body: GetGroupInviteLinkBody) {
-    const res = await this.#request<GetGroupInviteLinkResponse>(
+    const res = await this.api.json<GetGroupInviteLinkResponse>(
       "POST",
       "/group/invitelink",
       { body },
@@ -69,39 +65,39 @@ export class GroupModule {
   }
 
   async join(code: string) {
-    await this.#request<GroupActionResponse>("POST", "/group/join", {
+    await this.api.json<GroupActionResponse>("POST", "/group/join", {
       body: { code },
     });
   }
 
   async leave(groupJid: string) {
-    await this.#request<GroupActionResponse>("POST", "/group/leave", {
+    await this.api.json<GroupActionResponse>("POST", "/group/leave", {
       body: { groupJid: parseJid(groupJid) },
     });
   }
 
   async list() {
-    const res = await this.#request<ListGroupsResponse>("GET", "/group/list");
-    return res.data.map((d) => new Group(d, this.#request));
+    const res = await this.api.json<ListGroupsResponse>("GET", "/group/list");
+    return res.data.map((d) => new Group(d, this.api));
   }
 
   async myGroups() {
-    const res = await this.#request<ListGroupsResponse>("GET", "/group/myall");
-    return res.data.map((d) => new Group(d, this.#request));
+    const res = await this.api.json<ListGroupsResponse>("GET", "/group/myall");
+    return res.data.map((d) => new Group(d, this.api));
   }
 
   async setName(body: SetGroupNameBody) {
-    await this.#request<GroupActionResponse>("POST", "/group/name", { body });
+    await this.api.json<GroupActionResponse>("POST", "/group/name", { body });
   }
 
   async updateParticipants(body: UpdateParticipantsBody) {
-    await this.#request<GroupActionResponse>("POST", "/group/participant", {
+    await this.api.json<GroupActionResponse>("POST", "/group/participant", {
       body: { ...body, groupJid: parseJid(body.groupJid) },
     });
   }
 
   async setPhoto(body: SetGroupPhotoBody) {
-    const res = await this.#request<SetGroupPhotoResponse>(
+    const res = await this.api.json<SetGroupPhotoResponse>(
       "POST",
       "/group/photo",
       { body },
@@ -110,7 +106,7 @@ export class GroupModule {
   }
 
   async updateSettings(body: UpdateGroupSettingsBody) {
-    await this.#request<GroupActionResponse>("POST", "/group/settings", {
+    await this.api.json<GroupActionResponse>("POST", "/group/settings", {
       body,
     });
   }

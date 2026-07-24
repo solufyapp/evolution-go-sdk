@@ -1,4 +1,4 @@
-export type { EvolutionGoClientConfig } from "./client";
+export type { APIConfig, APITransport, RequestOptions } from "./api";
 export type { RejectCallBody } from "./modules/call";
 export type {
   ChatActionResponse,
@@ -105,7 +105,6 @@ export type {
   SuccessResponse,
   VCardStruct,
 } from "./shared";
-export type { RequestFn, RequestFormFn, RequestOptions } from "./transport";
 export { EvolutionGoClient } from "./client";
 export { EvolutionGoApiError } from "./errors";
 export { jidToString, parseJid } from "./jid";

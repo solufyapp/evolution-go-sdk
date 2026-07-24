@@ -1,12 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { GroupInfo } from "@/shared";
+import { makeApi } from "@/test-utils";
 import { Group } from "./entity";
 import { GroupModule } from "./group";
-
-function makeRequest() {
-  return vi.fn().mockResolvedValue({});
-}
 
 const jid = {
   User: "123456789-987654321",
@@ -53,21 +50,21 @@ const groupInfo: GroupInfo = {
 
 describe("GroupModule", () => {
   it("create posts the group then fetches full info to seed a Group entity", async () => {
-    const r = vi
-      .fn()
+    const api = makeApi();
+    vi.mocked(api.json)
       .mockResolvedValueOnce({
         message: "success",
         data: { jid, name: "Dev Team", owner: jid, added: [], failed: [] },
       })
       .mockResolvedValueOnce({ message: "success", data: groupInfo });
-    const result = await new GroupModule(r).create({
+    const result = await new GroupModule(api).create({
       groupName: "Dev Team",
       participants: ["1@s.whatsapp.net"],
     });
-    expect(r).toHaveBeenNthCalledWith(1, "POST", "/group/create", {
+    expect(api.json).toHaveBeenNthCalledWith(1, "POST", "/group/create", {
       body: { groupName: "Dev Team", participants: ["1@s.whatsapp.net"] },
     });
-    expect(r).toHaveBeenNthCalledWith(2, "POST", "/group/info", {
+    expect(api.json).toHaveBeenNthCalledWith(2, "POST", "/group/info", {
       body: { groupJid: "123456789-987654321@g.us" },
     });
     expect(result).toBeInstanceOf(Group);
@@ -75,47 +72,52 @@ describe("GroupModule", () => {
   });
 
   it("setDescription", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).setDescription({
+    const api = makeApi();
+    await new GroupModule(api).setDescription({
       groupJid: "g@g.us",
       description: "hi",
     });
-    expect(r).toHaveBeenCalledWith("POST", "/group/description", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/description", {
       body: { groupJid: "g@g.us", description: "hi" },
     });
   });
 
   it("getInfo returns a Group entity", async () => {
-    const r = vi
-      .fn()
-      .mockResolvedValue({ message: "success", data: groupInfo });
-    const result = await new GroupModule(r).getInfo("g@g.us");
-    expect(r).toHaveBeenCalledWith("POST", "/group/info", {
+    const api = makeApi();
+    vi.mocked(api.json).mockResolvedValue({
+      message: "success",
+      data: groupInfo,
+    });
+    const result = await new GroupModule(api).getInfo("g@g.us");
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/info", {
       body: { groupJid: "g@g.us" },
     });
     expect(result).toBeInstanceOf(Group);
   });
 
   it("getInviteLink", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).getInviteLink({ groupJid: "g@g.us", reset: true });
-    expect(r).toHaveBeenCalledWith("POST", "/group/invitelink", {
+    const api = makeApi();
+    await new GroupModule(api).getInviteLink({
+      groupJid: "g@g.us",
+      reset: true,
+    });
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/invitelink", {
       body: { groupJid: "g@g.us", reset: true },
     });
   });
 
   it("join", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).join("ABC123");
-    expect(r).toHaveBeenCalledWith("POST", "/group/join", {
+    const api = makeApi();
+    await new GroupModule(api).join("ABC123");
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/join", {
       body: { code: "ABC123" },
     });
   });
 
   it("leave sends groupJid serialized as a Jid object", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).leave("123456789-987654321@g.us");
-    expect(r).toHaveBeenCalledWith("POST", "/group/leave", {
+    const api = makeApi();
+    await new GroupModule(api).leave("123456789-987654321@g.us");
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/leave", {
       body: {
         groupJid: {
           User: "123456789-987654321",
@@ -129,39 +131,46 @@ describe("GroupModule", () => {
   });
 
   it("list wraps each item in a Group entity", async () => {
-    const r = vi
-      .fn()
-      .mockResolvedValue({ message: "success", data: [groupInfo] });
-    const result = await new GroupModule(r).list();
-    expect(r).toHaveBeenCalledWith("GET", "/group/list");
+    const api = makeApi();
+    vi.mocked(api.json).mockResolvedValue({
+      message: "success",
+      data: [groupInfo],
+    });
+    const result = await new GroupModule(api).list();
+    expect(api.json).toHaveBeenCalledWith("GET", "/group/list");
     expect(result[0]).toBeInstanceOf(Group);
   });
 
   it("myGroups wraps each item in a Group entity", async () => {
-    const r = vi
-      .fn()
-      .mockResolvedValue({ message: "success", data: [groupInfo] });
-    const result = await new GroupModule(r).myGroups();
-    expect(r).toHaveBeenCalledWith("GET", "/group/myall");
+    const api = makeApi();
+    vi.mocked(api.json).mockResolvedValue({
+      message: "success",
+      data: [groupInfo],
+    });
+    const result = await new GroupModule(api).myGroups();
+    expect(api.json).toHaveBeenCalledWith("GET", "/group/myall");
     expect(result[0]).toBeInstanceOf(Group);
   });
 
   it("setName", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).setName({ groupJid: "g@g.us", name: "New Name" });
-    expect(r).toHaveBeenCalledWith("POST", "/group/name", {
+    const api = makeApi();
+    await new GroupModule(api).setName({
+      groupJid: "g@g.us",
+      name: "New Name",
+    });
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/name", {
       body: { groupJid: "g@g.us", name: "New Name" },
     });
   });
 
   it("updateParticipants", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).updateParticipants({
+    const api = makeApi();
+    await new GroupModule(api).updateParticipants({
       groupJid: "g@g.us",
       participants: ["1@s.whatsapp.net"],
       action: "promote",
     });
-    expect(r).toHaveBeenCalledWith("POST", "/group/participant", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/participant", {
       body: {
         groupJid: {
           User: "g",
@@ -177,23 +186,23 @@ describe("GroupModule", () => {
   });
 
   it("setPhoto", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).setPhoto({
+    const api = makeApi();
+    await new GroupModule(api).setPhoto({
       groupJid: "g@g.us",
       image: "base64...",
     });
-    expect(r).toHaveBeenCalledWith("POST", "/group/photo", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/photo", {
       body: { groupJid: "g@g.us", image: "base64..." },
     });
   });
 
   it("updateSettings", async () => {
-    const r = makeRequest();
-    await new GroupModule(r).updateSettings({
+    const api = makeApi();
+    await new GroupModule(api).updateSettings({
       groupJid: "g@g.us",
       action: "locked",
     });
-    expect(r).toHaveBeenCalledWith("POST", "/group/settings", {
+    expect(api.json).toHaveBeenCalledWith("POST", "/group/settings", {
       body: { groupJid: "g@g.us", action: "locked" },
     });
   });

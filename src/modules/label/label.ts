@@ -1,4 +1,4 @@
-import type { RequestFn } from "@/transport";
+import type { APITransport } from "@/api";
 import type {
   ChatLabelBody,
   EditLabelBody,
@@ -9,43 +9,39 @@ import type {
 import { Label } from "./entity";
 
 export class LabelModule {
-  readonly #request: RequestFn;
-
-  constructor(request: RequestFn) {
-    this.#request = request;
-  }
+  constructor(private readonly api: APITransport) {}
 
   async list() {
-    const data = await this.#request<LabelData[]>("GET", "/label/list");
-    return data.map((d) => new Label(d, this.#request));
+    const data = await this.api.json<LabelData[]>("GET", "/label/list");
+    return data.map((d) => new Label(d, this.api));
   }
 
   async edit(body: EditLabelBody) {
-    await this.#request<LabelActionResponse>("POST", "/label/edit", {
+    await this.api.json<LabelActionResponse>("POST", "/label/edit", {
       body,
     });
   }
 
   async addToChat(body: ChatLabelBody) {
-    await this.#request<LabelActionResponse>("POST", "/label/chat", {
+    await this.api.json<LabelActionResponse>("POST", "/label/chat", {
       body,
     });
   }
 
   async removeFromChat(body: ChatLabelBody) {
-    await this.#request<LabelActionResponse>("POST", "/unlabel/chat", {
+    await this.api.json<LabelActionResponse>("POST", "/unlabel/chat", {
       body,
     });
   }
 
   async addToMessage(body: MessageLabelBody) {
-    await this.#request<LabelActionResponse>("POST", "/label/message", {
+    await this.api.json<LabelActionResponse>("POST", "/label/message", {
       body,
     });
   }
 
   async removeFromMessage(body: MessageLabelBody) {
-    await this.#request<LabelActionResponse>("POST", "/unlabel/message", {
+    await this.api.json<LabelActionResponse>("POST", "/unlabel/message", {
       body,
     });
   }

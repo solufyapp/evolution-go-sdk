@@ -1,4 +1,4 @@
-import type { RequestFn } from "@/transport";
+import type { APITransport } from "@/api";
 import type {
   DeleteMessageBody,
   DeleteMessageResponse,
@@ -16,19 +16,15 @@ import type {
 import { Message } from "./entity";
 
 export class MessageModule {
-  readonly #request: RequestFn;
-
-  constructor(request: RequestFn) {
-    this.#request = request;
-  }
+  constructor(private readonly api: APITransport) {}
 
   /** Builds a Message handle for a known chat + id — no network call. */
-  from(identity: { chat: string; id: string }) {
-    return new Message(identity, this.#request);
+  from(id: string, chat: string) {
+    return new Message(id, chat, this.api);
   }
 
   async delete(body: DeleteMessageBody) {
-    const res = await this.#request<DeleteMessageResponse>(
+    const res = await this.api.json<DeleteMessageResponse>(
       "POST",
       "/message/delete",
       { body },
@@ -37,7 +33,7 @@ export class MessageModule {
   }
 
   async downloadMedia(body: DownloadMediaBody) {
-    const res = await this.#request<DownloadMediaResponse>(
+    const res = await this.api.json<DownloadMediaResponse>(
       "POST",
       "/message/downloadmedia",
       { body },
@@ -46,7 +42,7 @@ export class MessageModule {
   }
 
   async edit(body: EditMessageBody) {
-    const res = await this.#request<EditMessageResponse>(
+    const res = await this.api.json<EditMessageResponse>(
       "POST",
       "/message/edit",
       { body },
@@ -55,7 +51,7 @@ export class MessageModule {
   }
 
   async markPlayed(body: MessageBatchBody) {
-    const res = await this.#request<MessageBatchResponse>(
+    const res = await this.api.json<MessageBatchResponse>(
       "POST",
       "/message/markplayed",
       { body },
@@ -64,7 +60,7 @@ export class MessageModule {
   }
 
   async markRead(body: MessageBatchBody) {
-    const res = await this.#request<MessageBatchResponse>(
+    const res = await this.api.json<MessageBatchResponse>(
       "POST",
       "/message/markread",
       { body },
@@ -73,7 +69,7 @@ export class MessageModule {
   }
 
   async setPresence(body: SetPresenceBody) {
-    const res = await this.#request<MessageBatchResponse>(
+    const res = await this.api.json<MessageBatchResponse>(
       "POST",
       "/message/presence",
       { body },
@@ -82,14 +78,14 @@ export class MessageModule {
   }
 
   async react(body: ReactBody) {
-    const res = await this.#request<ReactResponse>("POST", "/message/react", {
+    const res = await this.api.json<ReactResponse>("POST", "/message/react", {
       body,
     });
     return res.data;
   }
 
   async getStatus(id: string) {
-    const res = await this.#request<GetMessageStatusResponse>(
+    const res = await this.api.json<GetMessageStatusResponse>(
       "POST",
       "/message/status",
       { body: { id } },
