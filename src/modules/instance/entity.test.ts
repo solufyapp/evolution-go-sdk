@@ -1,13 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { CallModule } from "@/modules/call";
-import { ChatModule } from "@/modules/chat";
-import { CommunityModule } from "@/modules/community";
-import { GroupModule } from "@/modules/group";
-import { LabelModule } from "@/modules/label";
-import { MessageModule } from "@/modules/message";
-import { SendMessageModule } from "@/modules/send-message";
 import type { InstanceData } from "./types";
+import { InstanceClient } from "./client";
 import { Instance } from "./entity";
 
 function makeFetch(body: unknown = { message: "success", data: {} }) {
@@ -44,7 +38,7 @@ const data: InstanceData = {
   ignoreStatus: false,
 };
 
-describe("Instance client", () => {
+describe("Instance", () => {
   it("exposes id and data from construction", () => {
     const instance = new Instance(data, {
       baseUrl: "https://api.example.com",
@@ -54,162 +48,11 @@ describe("Instance client", () => {
     expect(instance.data).toBe(data);
   });
 
-  it("wires up one submodule per messaging tag", () => {
+  it("is an InstanceClient", () => {
     const instance = new Instance(data, {
       baseUrl: "https://api.example.com",
       fetch: makeFetch(),
     });
-    expect(instance.call).toBeInstanceOf(CallModule);
-    expect(instance.chat).toBeInstanceOf(ChatModule);
-    expect(instance.community).toBeInstanceOf(CommunityModule);
-    expect(instance.group).toBeInstanceOf(GroupModule);
-    expect(instance.label).toBeInstanceOf(LabelModule);
-    expect(instance.message).toBeInstanceOf(MessageModule);
-    expect(instance.sendMessage).toBeInstanceOf(SendMessageModule);
-  });
-
-  it("authenticates every request with its own token, not an admin key", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.chat.archive("chat@s.whatsapp.net");
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/chat/archive",
-      expect.objectContaining({
-        headers: expect.objectContaining({ apikey: "tok" }),
-      }),
-    );
-  });
-
-  it("connect() -> POST /instance/connect", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.connect({ phone: "5511999999999" });
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/connect",
-      expect.objectContaining({
-        body: JSON.stringify({ phone: "5511999999999" }),
-        headers: expect.objectContaining({ apikey: "tok" }),
-      }),
-    );
-  });
-
-  it("disconnect() -> POST /instance/disconnect", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.disconnect();
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/disconnect",
-      expect.objectContaining({
-        headers: expect.objectContaining({ apikey: "tok" }),
-      }),
-    );
-  });
-
-  it("reconnect() -> POST /instance/reconnect", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.reconnect();
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/reconnect",
-      expect.anything(),
-    );
-  });
-
-  it("logout() -> DELETE /instance/logout", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.logout();
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/logout",
-      expect.objectContaining({ method: "DELETE" }),
-    );
-  });
-
-  it("getStatus() -> GET /instance/status", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.getStatus();
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/status",
-      expect.anything(),
-    );
-  });
-
-  it("getQr() -> GET /instance/qr", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.getQr();
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/qr",
-      expect.anything(),
-    );
-  });
-
-  it("pair() -> POST /instance/pair", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.pair({ phone: "5511999999999" });
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/pair",
-      expect.objectContaining({
-        body: JSON.stringify({ phone: "5511999999999" }),
-      }),
-    );
-  });
-
-  it("getAdvancedSettings() targets this instance's own id", async () => {
-    const fetch = makeFetch();
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    await instance.getAdvancedSettings();
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/inst-1/advanced-settings",
-      expect.anything(),
-    );
-  });
-
-  it("updateAdvancedSettings() targets this instance's own id", async () => {
-    const fetch = makeFetch({ message: "ok", settings: { rejectCall: true } });
-    const instance = new Instance(data, {
-      baseUrl: "https://api.example.com",
-      fetch,
-    });
-    const settings = await instance.updateAdvancedSettings({
-      rejectCall: true,
-    });
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.example.com/instance/inst-1/advanced-settings",
-      expect.objectContaining({
-        method: "PUT",
-        body: JSON.stringify({ rejectCall: true }),
-      }),
-    );
-    expect(settings).toEqual({ rejectCall: true });
+    expect(instance).toBeInstanceOf(InstanceClient);
   });
 });

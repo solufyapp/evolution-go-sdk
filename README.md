@@ -40,17 +40,19 @@ try {
 }
 ```
 
-If you already have an instance's token from elsewhere (your own database, an env var) and don't need the admin client at all, construct an `Instance` directly:
+If you already have an instance's `id` and `token` (from your own DB or a webhook payload) and don't need the admin client, use `InstanceClient` directly — no other fields required:
 
 ```ts
-import { Instance } from "@solufy/evolution-go-sdk";
+import { InstanceClient } from "@solufy/evolution-go-sdk";
 
-const instance = new Instance(
-  { id: "inst-123", token: "secret" /* ...rest of InstanceData */ },
+const instance = new InstanceClient(
+  { id: "inst-123", token: "secret" },
   { baseUrl: "https://your-evolution-go-server.com" },
 );
 await instance.chat.archive("5511999999999@s.whatsapp.net");
 ```
+
+`Instance` (returned by the admin client's `create`/`getInfo`/`getAll`) extends `InstanceClient` and adds the full cached `.data: InstanceData` record — but has the same API otherwise.
 
 Every method resolves directly to the data you asked for — the server's `{message, data}` envelope is unwrapped for you.
 

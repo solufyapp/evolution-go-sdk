@@ -9,6 +9,7 @@ export type {
   GetQrResponse,
   GetStatusResponse,
   InstanceActionResponse,
+  InstanceConfig,
   InstanceData,
   LogEntry,
   PairBody,
@@ -16,5 +17,6 @@ export type {
   SetProxyResponse,
   UpdateAdvancedSettingsResponse,
 } from "./types";
+export { InstanceClient } from "./client";
 export { Instance } from "./entity";
 export { InstanceModule } from "./instance";

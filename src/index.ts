@@ -38,6 +38,7 @@ export type {
   GetQrResponse,
   GetStatusResponse,
   InstanceActionResponse,
+  InstanceConfig,
   InstanceData,
   LogEntry,
   PairBody,
@@ -111,6 +112,6 @@ export { jidToString, parseJid } from "./jid";
 export { Chat } from "./modules/chat";
 export { Community } from "./modules/community";
 export { Group } from "./modules/group";
-export { Instance } from "./modules/instance";
+export { Instance, InstanceClient } from "./modules/instance";
 export { Label } from "./modules/label";
 export { Message } from "./modules/message";

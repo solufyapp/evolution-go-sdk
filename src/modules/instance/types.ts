@@ -5,6 +5,11 @@ import type {
   SuccessResponse,
 } from "@/shared";
 
+export interface InstanceConfig {
+  id: string;
+  token: string;
+}
+
 export interface ConnectBody {
   phone?: string;
   immediate?: boolean;

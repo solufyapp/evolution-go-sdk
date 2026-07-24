@@ -30,9 +30,10 @@ Run `check-types`, `test`, and `lint:ci` (and `build` for anything touching expo
 Evolution GO gates routes with two middlewares: `AuthAdmin` (global admin key, exact match) and `Auth` (any instance's own token). The SDK mirrors that as two client classes instead of one client with methods that only work for some keys:
 
 - **`EvolutionGoClient`** (`src/client.ts`) — admin key only. Holds `instance: InstanceModule`, the `AuthAdmin`-gated instance lifecycle routes (`create`, `getAll`, `getInfo`, `delete`, `setProxy`, `deleteProxy`, `forceReconnect`, `getLogs`).
-- **`Instance`** (`src/modules/instance/entity.ts`) — one instance's own token. Holds every messaging module (`call`, `chat`, `community`, `group`, `label`, `message`, `sendMessage`) plus session ops (`connect`, `disconnect`, `reconnect`, `logout`, `getStatus`, `getQr`, `pair`, `getAdvancedSettings`, `updateAdvancedSettings`) — everything `Auth`-gated.
+- **`InstanceClient`** (`src/modules/instance/client.ts`) — one instance's own token. Holds every messaging module (`call`, `chat`, `community`, `group`, `label`, `message`, `sendMessage`) plus session ops (`connect`, `disconnect`, `reconnect`, `logout`, `getStatus`, `getQr`, `pair`, `getAdvancedSettings`, `updateAdvancedSettings`) — everything `Auth`-gated. Constructed with just `{ id, token }` + `{ baseUrl }`.
+- **`Instance`** (`src/modules/instance/entity.ts`) — extends `InstanceClient`, adds `readonly data: InstanceData`. This is what `InstanceModule.create()`/`getInfo()`/`getAll()` return. Has the same API as `InstanceClient` plus the full cached record on `.data`.
 
-`InstanceModule.create()`/`getInfo()`/`getAll()` return `Instance` clients already scoped to that instance's token. `Instance` is also a plain exported class, constructible directly from an `InstanceData` obtained elsewhere (your own DB, a webhook payload) — no admin client required.
+Use `InstanceClient` when you only have a token and id (from your own DB, an env var, a webhook payload) and don't need the rest of `InstanceData`. Use `Instance` when you got it from the admin client and want the cached record too.
 
 When placing a new endpoint, check which middleware actually gates that route in the server source — don't assume from the URL shape (e.g. `/instance/:instanceId/advanced-settings` takes a path param but is `Auth`-gated, so it belongs on `Instance`, not `InstanceModule`).
 
