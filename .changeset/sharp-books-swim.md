@@ -1,5 +1,5 @@
 ---
-"@solufy/evolution-go-sdk": patch
+"@solufy/evolution-go-sdk": minor
 ---
 
 Add `InstanceClient` as token-only base class.
