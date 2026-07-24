@@ -1,5 +1,15 @@
 # @solufy/evolution-go-sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- a3bebef: Add `InstanceClient` as token-only base class.
+
+### Patch Changes
+
+- e579162: Tweak some typings to match the official API.
+
 ## 0.3.0
 
 ### Minor Changes
