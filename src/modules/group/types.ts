@@ -1,11 +1,16 @@
-import type {
-  GroupInfo,
-  GroupSettingsAction,
-  Jid,
-  ParticipantChange,
-  SuccessMessage,
-  SuccessResponse,
-} from "@/shared";
+import type { GroupInfo, Jid, SuccessMessage, SuccessResponse } from "@/shared";
+
+export type ParticipantChange = "add" | "remove" | "promote" | "demote";
+
+export type GroupSettingsAction =
+  | "announcement"
+  | "not_announcement"
+  | "locked"
+  | "unlocked"
+  | "approval_on"
+  | "approval_off"
+  | "admin_add"
+  | "all_member_add";
 
 export interface CreateGroupBody {
   groupName: string;

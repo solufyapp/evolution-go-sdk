@@ -1,14 +1,12 @@
 import type { APITransport } from "@/api";
-import type {
-  GroupInfo,
-  GroupSettingsAction,
-  ParticipantChange,
-} from "@/shared";
+import type { GroupInfo } from "@/shared";
 import { jidToString } from "@/jid";
 import type {
   GetGroupInfoResponse,
   GetGroupInviteLinkResponse,
   GroupActionResponse,
+  GroupSettingsAction,
+  ParticipantChange,
   SetGroupPhotoResponse,
 } from "./types";
 

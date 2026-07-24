@@ -1,14 +1,3 @@
-export interface QuotedStruct {
-  messageId?: string;
-  participant?: string;
-}
-
-export interface VCardStruct {
-  fullName?: string;
-  organization?: string;
-  phone?: string;
-}
-
 export interface AdvancedSettings {
   alwaysOnline?: boolean;
   ignoreGroups?: boolean;
@@ -26,24 +15,10 @@ export interface ProxyConfig {
   password?: string;
 }
 
-export type ParticipantChange = "add" | "remove" | "promote" | "demote";
-
-export type GroupSettingsAction =
-  | "announcement"
-  | "not_announcement"
-  | "locked"
-  | "unlocked"
-  | "approval_on"
-  | "approval_off"
-  | "admin_add"
-  | "all_member_add";
-
-/** Envelope used by endpoints that only confirm an action, no payload. */
 export interface SuccessMessage {
   message: string;
 }
 
-/** Envelope used by endpoints that return a payload alongside the confirmation. */
 export interface SuccessResponse<T> {
   message: string;
   data: T;

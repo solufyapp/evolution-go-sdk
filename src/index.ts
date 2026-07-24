@@ -17,7 +17,9 @@ export type {
   GetGroupInviteLinkBody,
   GetGroupInviteLinkResponse,
   GroupActionResponse,
+  GroupSettingsAction,
   ListGroupsResponse,
+  ParticipantChange,
   SetGroupDescriptionBody,
   SetGroupNameBody,
   SetGroupPhotoBody,
@@ -74,6 +76,7 @@ export type {
   IdentifiableMessageBase,
   MentionableMessageBase,
   PixKeyType,
+  QuotedStruct,
   Row,
   Section,
   SendButtonBody,
@@ -90,20 +93,17 @@ export type {
   SendStatusTextBody,
   SendStickerBody,
   SendTextBody,
+  VCardStruct,
 } from "./modules/send-message";
 export type {
   AdvancedSettings,
   GroupInfo,
   GroupParticipant,
-  GroupSettingsAction,
   Jid,
   MessageSendResult,
-  ParticipantChange,
   ProxyConfig,
-  QuotedStruct,
   SuccessMessage,
   SuccessResponse,
-  VCardStruct,
 } from "./shared";
 export { EvolutionGoClient } from "./client";
 export { EvolutionGoApiError } from "./errors";

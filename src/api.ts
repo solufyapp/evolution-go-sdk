@@ -6,6 +6,11 @@ export interface APIConfig {
   fetch?: typeof globalThis.fetch;
 }
 
+/**
+ * The only place in the SDK that touches `fetch`. Every module/entity
+ * constructor takes one instance, scoped to a single apikey for its
+ * lifetime — there is no per-call key override.
+ */
 export class APITransport {
   doFetch = globalThis.fetch;
   baseUrl: string;
@@ -17,6 +22,7 @@ export class APITransport {
     this.apiKey = config.apiKey;
   }
 
+  /** Sends a JSON request; throws {@link EvolutionGoApiError} on a non-2xx response. */
   async json<T>(
     method: string,
     path: string,
@@ -51,6 +57,7 @@ export class APITransport {
     return json as T;
   }
 
+  /** Sends a multipart/form-data request (media/status uploads); same error handling as {@link json}. */
   async formData<T>(method: string, path: string, form: FormData): Promise<T> {
     const res = await this.doFetch(this.baseUrl + path, {
       method,

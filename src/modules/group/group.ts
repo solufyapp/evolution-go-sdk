@@ -20,12 +20,6 @@ import { Group } from "./entity";
 export class GroupModule {
   constructor(private readonly api: APITransport) {}
 
-  /**
-   * The create endpoint only returns {jid, name, owner, added, failed} —
-   * not a full GroupInfo — so this makes one extra getInfo() call to seed
-   * a fully-populated Group entity. A one-time construction cost, not a
-   * recurring auto-refresh pattern.
-   */
   async create(body: CreateGroupBody) {
     const created = await this.api.json<CreateGroupResponse>(
       "POST",

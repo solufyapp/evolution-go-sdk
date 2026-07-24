@@ -1,9 +1,15 @@
-import type {
-  MessageSendResult,
-  QuotedStruct,
-  SuccessResponse,
-  VCardStruct,
-} from "@/shared";
+import type { MessageSendResult, SuccessResponse } from "@/shared";
+
+export interface QuotedStruct {
+  messageId?: string;
+  participant?: string;
+}
+
+export interface VCardStruct {
+  fullName?: string;
+  organization?: string;
+  phone?: string;
+}
 
 export type SendMessageResponse = SuccessResponse<MessageSendResult>;
 

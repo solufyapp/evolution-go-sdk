@@ -7,6 +7,7 @@ export type {
   IdentifiableMessageBase,
   MentionableMessageBase,
   PixKeyType,
+  QuotedStruct,
   Row,
   Section,
   SendButtonBody,
@@ -23,5 +24,6 @@ export type {
   SendStatusTextBody,
   SendStickerBody,
   SendTextBody,
+  VCardStruct,
 } from "./types";
 export { SendMessageModule } from "./send-message";
